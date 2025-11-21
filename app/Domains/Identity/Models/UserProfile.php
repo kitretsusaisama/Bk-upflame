@@ -2,12 +2,10 @@
 
 namespace App\Domains\Identity\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 
-class UserProfile extends Model
+class UserProfile extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'user_id',
@@ -36,5 +34,10 @@ class UserProfile extends Model
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserProfileFactory::new();
     }
 }

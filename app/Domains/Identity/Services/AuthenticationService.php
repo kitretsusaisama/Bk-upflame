@@ -69,6 +69,18 @@ class AuthenticationService
         return $user->createToken($deviceName)->plainTextToken;
     }
 
+    public function createSsoToken(User $user, string $deviceName = 'web-session'): string
+    {
+        $user->tokens()->where('name', $deviceName)->delete();
+
+        return $this->createAccessToken($user, $deviceName);
+    }
+
+    public function revokeTokenByName(User $user, string $deviceName): void
+    {
+        $user->tokens()->where('name', $deviceName)->delete();
+    }
+
     public function revokeAllTokens(User $user): void
     {
         $user->tokens()->delete();

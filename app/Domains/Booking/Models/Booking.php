@@ -2,14 +2,12 @@
 
 namespace App\Domains\Booking\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\{Tenant, User};
 use App\Domains\Provider\Models\Provider;
 
-class Booking extends Model
+class Booking extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',
@@ -59,5 +57,10 @@ class Booking extends Model
     public function isCancelable(): bool
     {
         return in_array($this->status, ['processing', 'confirmed']) && $this->scheduled_at->isFuture();
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\BookingFactory::new();
     }
 }

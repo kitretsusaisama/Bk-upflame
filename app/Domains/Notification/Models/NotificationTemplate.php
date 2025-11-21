@@ -2,13 +2,11 @@
 
 namespace App\Domains\Notification\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\Tenant;
 
-class NotificationTemplate extends Model
+class NotificationTemplate extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',

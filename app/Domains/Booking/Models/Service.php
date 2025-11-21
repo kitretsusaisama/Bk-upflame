@@ -2,13 +2,11 @@
 
 namespace App\Domains\Booking\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\Tenant;
 
-class Service extends Model
+class Service extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',
@@ -34,5 +32,10 @@ class Service extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\ServiceFactory::new();
     }
 }

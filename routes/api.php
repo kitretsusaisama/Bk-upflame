@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Identity\Http\Controllers\TenantController;
+use App\Domains\Identity\Http\Controllers\SsoController;
 use App\Domains\Identity\Http\Controllers\UserController;
 use App\Domains\Access\Http\Controllers\RoleController;
 use App\Domains\Access\Http\Controllers\PermissionController;
@@ -28,6 +29,10 @@ Route::prefix('v1')->group(function () {
             Route::post('mfa/verify', [AuthController::class, 'verifyMfa']);
             Route::post('token', [AuthController::class, 'refreshToken']);
         });
+    });
+
+    Route::middleware('auth:sanctum')->prefix('sso')->group(function () {
+        Route::post('exchange', [SsoController::class, 'exchange']);
     });
 
     Route::middleware(['auth:sanctum', 'tenant.resolution', 'tenant.scope'])->group(function () {

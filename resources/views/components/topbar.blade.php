@@ -1,4 +1,4 @@
-<header class="topbar">
+    <header class="topbar">
     <div class="topbar-left">
         <button class="mobile-menu-toggle" id="mobileMenuToggle">
             <span>☰</span>
@@ -62,13 +62,10 @@
                     <span>Settings</span>
                 </a>
                 <div class="dropdown-divider"></div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="dropdown-item">
-                        <span class="dropdown-icon">🚪</span>
-                        <span>Logout</span>
-                    </button>
-                </form>
+                <a href="{{ route('logout') }}" class="dropdown-item">
+                    <span class="dropdown-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
             </div>
         </div>
     </div>

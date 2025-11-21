@@ -11,9 +11,11 @@ class TenantScope
     {
         if (auth()->check()) {
             $user = auth()->user();
-            $tenant = app('tenant');
+            $tenant = app()->bound('tenant') ? app('tenant') : null;
             
-            if ($user->tenant_id !== $tenant->id) {
+            // If there's no tenant binding, allow the request to proceed
+            // This might be the case for super admins or other special cases
+            if ($tenant && $user->tenant_id !== $tenant->id) {
                 return response()->json([
                     'status' => 'error',
                     'error' => [

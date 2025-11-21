@@ -2,12 +2,10 @@
 
 namespace App\Domains\Workflow\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 
-class WorkflowEvent extends Model
+class WorkflowEvent extends BaseModel
 {
-    use HasUuids;
 
     public $timestamps = false;
 

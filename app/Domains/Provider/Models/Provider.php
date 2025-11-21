@@ -2,14 +2,12 @@
 
 namespace App\Domains\Provider\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\{Tenant, User};
 use App\Domains\Workflow\Models\Workflow;
 
-class Provider extends Model
+class Provider extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',
@@ -66,5 +64,10 @@ class Provider extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\ProviderFactory::new();
     }
 }

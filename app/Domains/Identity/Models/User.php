@@ -3,13 +3,17 @@
 namespace App\Domains\Identity\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, HasUuids;
+    use HasApiTokens;
+    use Notifiable;
+    use HasUuids;
+    use HasFactory;
 
     protected $fillable = [
         'tenant_id',
@@ -63,6 +67,16 @@ class User extends Authenticatable
         return $this->hasMany(UserSession::class);
     }
 
+    public function provider()
+    {
+        return $this->hasOne(\App\Domains\Provider\Models\Provider::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(\App\Domains\Booking\Models\Booking::class);
+    }
+
     public function mfaMethods()
     {
         return $this->hasMany(MfaMethod::class);
@@ -76,6 +90,11 @@ class User extends Authenticatable
     public function isLocked(): bool
     {
         return $this->locked_until && $this->locked_until->isFuture();
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
     }
 
     public function hasPermission(string $permission): bool
@@ -96,6 +115,12 @@ class User extends Authenticatable
      */
     public function hasRole(string $roleName): bool
     {
-        return $this->roles()->where('name', $roleName)->exists();
+        // First check if roles are loaded
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+        
+        // Check if user has the role by name
+        return $this->roles->contains('name', $roleName);
     }
 }

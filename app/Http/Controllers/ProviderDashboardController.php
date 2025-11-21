@@ -18,6 +18,10 @@ class ProviderDashboardController extends Controller
     {
         $provider = auth()->user()->provider;
 
+        if (!$provider) {
+            abort(403, 'Provider profile not configured');
+        }
+
         $menuItems = [
             ['label' => 'Dashboard', 'route' => 'provider.dashboard', 'icon' => '📊'],
             ['label' => 'Bookings', 'route' => 'provider.bookings', 'icon' => '📅'],
@@ -29,13 +33,13 @@ class ProviderDashboardController extends Controller
         ];
 
         $stats = [
-            'total_bookings' => $provider ? $this->bookingRepository->findByProvider($provider->id, 1)->total() : 0,
-            'upcoming_bookings' => $provider ? $this->bookingRepository->findByStatus('confirmed', null, 1)->total() : 0,
-            'completed_bookings' => $provider ? $this->bookingRepository->findByStatus('completed', null, 1)->total() : 0,
-            'rating' => '4.8',
+            'total_bookings' => $this->bookingRepository->totalForProvider($provider->id),
+            'upcoming_bookings' => $this->bookingRepository->countByStatusForProvider($provider->id, 'confirmed'),
+            'completed_bookings' => $this->bookingRepository->countByStatusForProvider($provider->id, 'completed'),
+            'rating' => number_format($provider->profile_json['rating'] ?? 4.8, 1),
         ];
 
-        $upcomingBookings = $provider ? $this->bookingRepository->findByProvider($provider->id, 10) : collect();
+        $upcomingBookings = $this->bookingRepository->upcomingForProvider($provider->id);
 
         return view('provider.dashboard', compact('menuItems', 'stats', 'upcomingBookings'));
     }

@@ -2,13 +2,25 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domains\Identity\Services\AuthenticationService;
 use App\Http\Controllers\Controller;
+use App\Support\Concerns\DeterminesDashboardRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    use DeterminesDashboardRoute;
+
+    protected AuthenticationService $authService;
+
+    public function __construct(AuthenticationService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     /**
      * Show the login form
      *
@@ -35,8 +47,11 @@ class LoginController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+        
+        // Always enable "remember me" functionality
+        $remember = true;
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             // Check if user is active
@@ -47,11 +62,12 @@ class LoginController extends Controller
                 ]);
             }
 
-            // Update last login
-            Auth::user()->update(['last_login' => now()]);
+            $user = Auth::user();
+            $user->update(['last_login' => now()]);
 
-            // Redirect based on user role
-            return $this->redirectBasedOnRole(Auth::user());
+            $this->issueSsoToken($request, $user);
+
+            return redirect()->route($this->determineDashboardRoute($user));
         }
 
         throw ValidationException::withMessages([
@@ -65,30 +81,28 @@ class LoginController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function redirectBasedOnRole($user)
+    protected function issueSsoToken(Request $request, $user): void
     {
-        // Check if user has super admin role
-        if ($user->hasRole('super_admin')) {
-            return redirect()->intended(route('superadmin.dashboard'));
-        }
-        
-        // Check if user has tenant admin role
-        if ($user->hasRole('tenant_admin')) {
-            return redirect()->intended(route('tenantadmin.dashboard'));
-        }
-        
-        // Check if user has provider role
-        if ($user->hasRole('provider')) {
-            return redirect()->intended(route('provider.dashboard'));
-        }
-        
-        // Check if user has ops role
-        if ($user->hasRole('ops')) {
-            return redirect()->intended(route('ops.dashboard'));
-        }
-        
-        // Default to customer dashboard
-        return redirect()->intended(route('customer.dashboard'));
+        $token = $this->authService->createSsoToken($user);
+
+        $request->session()->put('sso_token', $token);
+
+        cookie()->queue(cookie(
+            'sso_token',
+            $token,
+            60 * 24,
+            '/',
+            null,
+            config('session.secure', false),
+            true,
+            false,
+            config('session.same_site') ?? 'lax'
+        ));
+
+        Log::info('Issued SSO token for user', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
     }
 
     /**
@@ -99,10 +113,19 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $user = $request->user();
+
+        if ($user) {
+            $this->authService->revokeTokenByName($user, 'web-session');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->forget('sso_token');
+
+        cookie()->queue(cookie()->forget('sso_token'));
 
         return redirect()->route('login');
     }

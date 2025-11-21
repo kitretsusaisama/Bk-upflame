@@ -2,13 +2,11 @@
 
 namespace App\Domains\Booking\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\User;
 
-class BookingStatusHistory extends Model
+class BookingStatusHistory extends BaseModel
 {
-    use HasUuids;
 
     public $timestamps = false;
 

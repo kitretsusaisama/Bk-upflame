@@ -44,11 +44,6 @@
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <div class="form-group form-checkbox">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Remember me</label>
-            </div>
-
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
 
             <div class="auth-links">

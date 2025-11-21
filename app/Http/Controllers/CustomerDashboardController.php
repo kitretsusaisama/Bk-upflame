@@ -29,13 +29,13 @@ class CustomerDashboardController extends Controller
         ];
 
         $stats = [
-            'total_bookings' => $this->bookingRepository->findByUser($userId, 1)->total(),
-            'upcoming_bookings' => $this->bookingRepository->findByStatus('confirmed', null, 1)->total(),
-            'completed_bookings' => $this->bookingRepository->findByStatus('completed', null, 1)->total(),
-            'total_spent' => number_format(rand(500, 2000), 2),
+            'total_bookings' => $this->bookingRepository->totalForUser($userId),
+            'upcoming_bookings' => $this->bookingRepository->countByStatusForUser($userId, 'confirmed'),
+            'completed_bookings' => $this->bookingRepository->countByStatusForUser($userId, 'completed'),
+            'total_spent' => number_format($this->bookingRepository->totalAmountForUser($userId), 2),
         ];
 
-        $upcomingBookings = $this->bookingRepository->findByUser($userId, 10);
+        $upcomingBookings = $this->bookingRepository->upcomingForUser($userId);
 
         return view('customer.dashboard', compact('menuItems', 'stats', 'upcomingBookings'));
     }

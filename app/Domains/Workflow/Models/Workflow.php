@@ -2,13 +2,11 @@
 
 namespace App\Domains\Workflow\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\Tenant;
 
-class Workflow extends Model
+class Workflow extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',

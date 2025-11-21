@@ -24,7 +24,21 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $tenantId = app('tenant')->id;
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenant = app('tenant');
+        $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        
+        // If we still don't have a tenant ID, throw an exception
+        if (!$tenantId) {
+            return response()->json([
+                'status' => 'error',
+                'error' => [
+                    'code' => 'TENANT_NOT_FOUND',
+                    'message' => 'Tenant not found'
+                ]
+            ], 403);
+        }
+        
         $users = $this->userRepository->findByTenant($tenantId, $request->get('limit', 20));
 
         return response()->json([
@@ -43,7 +57,20 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20'
         ]);
 
-        $tenantId = app('tenant')->id;
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenant = app('tenant');
+        $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        
+        // If we still don't have a tenant ID, throw an exception
+        if (!$tenantId) {
+            return response()->json([
+                'status' => 'error',
+                'error' => [
+                    'code' => 'TENANT_NOT_FOUND',
+                    'message' => 'Tenant not found'
+                ]
+            ], 403);
+        }
         
         $userData = [
             'id' => Str::uuid()->toString(),
@@ -177,7 +204,20 @@ class UserController extends Controller
             ], 404);
         }
         
-        $tenantId = app('tenant')->id;
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenant = app('tenant');
+        $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        
+        // If we still don't have a tenant ID, throw an exception
+        if (!$tenantId) {
+            return response()->json([
+                'status' => 'error',
+                'error' => [
+                    'code' => 'TENANT_NOT_FOUND',
+                    'message' => 'Tenant not found'
+                ]
+            ], 403);
+        }
         
         $user->roles()->attach($validated['role_id'], [
             'id' => Str::uuid()->toString(),

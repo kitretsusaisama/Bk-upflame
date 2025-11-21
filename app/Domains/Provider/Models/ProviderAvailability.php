@@ -2,12 +2,10 @@
 
 namespace App\Domains\Provider\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 
-class ProviderAvailability extends Model
+class ProviderAvailability extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'provider_id',

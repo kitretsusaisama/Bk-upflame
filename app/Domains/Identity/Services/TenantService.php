@@ -2,8 +2,13 @@
 
 namespace App\Domains\Identity\Services;
 
+use App\Domains\Access\Models\Permission;
+use App\Domains\Access\Models\Role;
 use App\Domains\Identity\Models\Tenant;
+use App\Domains\Identity\Models\User;
 use App\Domains\Identity\Repositories\TenantRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class TenantService
@@ -102,16 +107,42 @@ class TenantService
 
     public function createTenantWithAdmin(array $data)
     {
-        $tenantData = [
-            'id' => Str::uuid()->toString(),
-            'name' => $data['name'],
-            'domain' => $data['domain'],
-            'status' => 'active'
-        ];
-        
-        $tenant = $this->createTenant($tenantData);
-        
-        return $tenant->load(['domains', 'configs']);
+        return DB::transaction(function () use ($data) {
+            $tenantData = [
+                'id' => Str::uuid()->toString(),
+                'name' => $data['name'],
+                'domain' => $data['domain'],
+                'status' => 'active',
+            ];
+
+            $tenant = $this->createTenant($tenantData);
+            $roles = $this->createDefaultRoles($tenant);
+
+            $adminUser = User::create([
+                'tenant_id' => $tenant->id,
+                'email' => $data['admin_email'],
+                'password' => Hash::make($data['admin_password']),
+                'status' => 'active',
+                'primary_role_id' => $roles['tenant_admin']->id,
+                'mfa_enabled' => false,
+                'email_verified' => true,
+                'phone_verified' => false,
+            ]);
+
+            $adminUser->profile()->create([
+                'tenant_id' => $tenant->id,
+                'first_name' => 'Tenant',
+                'last_name' => 'Administrator',
+            ]);
+
+            $adminUser->roles()->attach($roles['tenant_admin']->id, [
+                'id' => Str::uuid()->toString(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $adminUser->id,
+            ]);
+
+            return $tenant->load(['domains', 'configs']);
+        });
     }
 
     public function addDomain($tenantId, array $data)
@@ -128,5 +159,55 @@ class TenantService
             'is_primary' => $data['is_primary'] ?? false,
             'is_verified' => false
         ]);
+    }
+
+    protected function createDefaultRoles(Tenant $tenant): array
+    {
+        $roleDefinitions = [
+            'tenant_admin' => [
+                'name' => 'Tenant Admin',
+                'description' => 'Tenant administrator with full access within the tenant boundary',
+                'role_family' => 'Internal',
+            ],
+            'provider' => [
+                'name' => 'Provider',
+                'description' => 'Service provider role',
+                'role_family' => 'Provider',
+            ],
+            'customer' => [
+                'name' => 'Customer',
+                'description' => 'End customer role',
+                'role_family' => 'Customer',
+            ],
+            'premium_customer' => [
+                'name' => 'Premium Customer',
+                'description' => 'Premium customer with extended privileges',
+                'role_family' => 'Customer',
+            ],
+        ];
+
+        $roles = [];
+
+        foreach ($roleDefinitions as $key => $definition) {
+            $roles[$key] = Role::firstOrCreate(
+                [
+                    'tenant_id' => $tenant->id,
+                    'name' => $definition['name'],
+                ],
+                [
+                    'description' => $definition['description'],
+                    'role_family' => $definition['role_family'],
+                    'is_system' => true,
+                ]
+            );
+        }
+
+        $permissionIds = Permission::pluck('id')->toArray();
+
+        if (!empty($permissionIds)) {
+            $roles['tenant_admin']->permissions()->sync($permissionIds);
+        }
+
+        return $roles;
     }
 }

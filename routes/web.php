@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Domains\Identity\Http\Controllers\SsoController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TenantAdminController;
 use App\Http\Controllers\ProviderDashboardController;
@@ -11,74 +13,203 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 
-// Public routes
+
+/*
+|--------------------------------------------------------------------------
+| Public Landing Redirect
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
-    return redirect()->route('customer.dashboard');
+
+    if (Auth::check()) {
+        $user = Auth::user()->load('roles');
+
+        if ($user->hasRole('Super Admin')) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
+        if ($user->hasRole('Tenant Admin')) {
+            return redirect()->route('tenantadmin.dashboard');
+        }
+
+        if ($user->hasRole('Provider')) {
+            return redirect()->route('provider.dashboard');
+        }
+
+        if ($user->hasRole('Ops')) {
+            return redirect()->route('ops.dashboard');
+        }
+
+        if ($user->hasRole('Premium Customer')) {
+            return redirect()->route('customer.dashboard');
+        }
+
+        if ($user->hasRole('Customer')) {
+            return redirect()->route('customer.dashboard'); // FIXED
+        }
+
+        return redirect()->route('customer.dashboard');
+    }
+
+    return redirect()->route('login');
 });
 
-// Authentication routes
+
+
+/*
+|--------------------------------------------------------------------------
+| Authentication (Guest Only)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
+    Route::get('/login',  [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+
+    Route::get('/register',  [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
-    
-    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    
-    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
+        ->name('password.update');
 });
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Super Admin Dashboard Routes
-Route::prefix('superadmin')->name('superadmin.')->middleware(['auth'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Logout
+|--------------------------------------------------------------------------
+*/
+Route::get('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->prefix('sso')->name('sso.')->group(function () {
+    Route::get('/token', [SsoController::class, 'token'])->name('token');
+    Route::post('/revoke', [SsoController::class, 'revoke'])->name('revoke');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| SUPER ADMIN DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('superadmin')
+    ->name('superadmin.')
+    ->middleware(['auth'])
+    ->group(function () {
+
     Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+
     Route::get('/tenants', [SuperAdminController::class, 'tenants'])->name('tenants');
+
     Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
+
     Route::get('/system', [SuperAdminController::class, 'system'])->name('system');
-    Route::get('/reports', function() { return view('superadmin.dashboard'); })->name('reports');
-    Route::get('/logs', function() { return view('superadmin.dashboard'); })->name('logs');
+
+    Route::get('/reports', function () {
+        return view('superadmin.reports');
+    })->name('reports');
+
+    Route::get('/logs', function () {
+        return view('superadmin.logs');
+    })->name('logs');
 });
 
-// Tenant Admin Dashboard Routes
-Route::prefix('tenantadmin')->name('tenantadmin.')->middleware(['auth', 'tenant.resolution', 'tenant.scope'])->group(function () {
+
+
+/*
+|--------------------------------------------------------------------------
+| TENANT ADMIN DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('tenantadmin')
+    ->name('tenantadmin.')
+    ->middleware(['auth', 'tenant.resolution'])
+    ->group(function () {
+
     Route::get('/dashboard', [TenantAdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/users', function() { return view('tenantadmin.dashboard'); })->name('users');
-    Route::get('/providers', function() { return view('tenantadmin.dashboard'); })->name('providers');
-    Route::get('/bookings', function() { return view('tenantadmin.dashboard'); })->name('bookings');
-    Route::get('/roles', function() { return view('tenantadmin.dashboard'); })->name('roles');
-    Route::get('/settings', function() { return view('tenantadmin.dashboard'); })->name('settings');
+
+    Route::view('/users', 'tenantadmin.users')->name('users');
+    Route::view('/providers', 'tenantadmin.providers')->name('providers');
+    Route::view('/bookings', 'tenantadmin.bookings')->name('bookings');
+    Route::view('/roles', 'tenantadmin.roles')->name('roles');
+    Route::view('/settings', 'tenantadmin.settings')->name('settings');
 });
 
-// Provider Dashboard Routes
-Route::prefix('provider')->name('provider.')->middleware(['auth', 'tenant.resolution', 'tenant.scope'])->group(function () {
+
+
+/*
+|--------------------------------------------------------------------------
+| PROVIDER DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('provider')
+    ->name('provider.')
+    ->middleware(['auth', 'tenant.resolution'])
+    ->group(function () {
+
     Route::get('/dashboard', [ProviderDashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('/bookings', function() { return view('provider.dashboard'); })->name('bookings');
-    Route::get('/schedule', function() { return view('provider.dashboard'); })->name('schedule');
-    Route::get('/services', function() { return view('provider.dashboard'); })->name('services');
-    Route::get('/profile', function() { return view('provider.dashboard'); })->name('profile');
-    Route::get('/reviews', function() { return view('provider.dashboard'); })->name('reviews');
+
+    Route::view('/bookings', 'provider.bookings')->name('bookings');
+    Route::view('/schedule', 'provider.schedule')->name('schedule');
+    Route::view('/services', 'provider.services')->name('services');
+    Route::view('/profile', 'provider.profile')->name('profile');
+    Route::view('/reviews', 'provider.reviews')->name('reviews');
 });
 
-// Operations Dashboard Routes
-Route::prefix('ops')->name('ops.')->middleware(['auth', 'tenant.resolution', 'tenant.scope'])->group(function () {
+
+
+/*
+|--------------------------------------------------------------------------
+| OPS DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('ops')
+    ->name('ops.')
+    ->middleware(['auth', 'tenant.resolution'])
+    ->group(function () {
+
     Route::get('/dashboard', [OpsDashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('/workflows', function() { return view('ops.dashboard'); })->name('workflows');
-    Route::get('/approvals', function() { return view('ops.dashboard'); })->name('approvals');
-    Route::get('/reports', function() { return view('ops.dashboard'); })->name('reports');
-    Route::get('/analytics', function() { return view('ops.dashboard'); })->name('analytics');
-    Route::get('/logs', function() { return view('ops.dashboard'); })->name('logs');
+
+    Route::view('/workflows', 'ops.workflows')->name('workflows');
+    Route::view('/approvals', 'ops.approvals')->name('approvals');
+    Route::view('/reports', 'ops.reports')->name('reports');
+    Route::view('/analytics', 'ops.analytics')->name('analytics');
+    Route::view('/logs', 'ops.logs')->name('logs');
 });
 
-// Customer Dashboard Routes
-Route::prefix('customer')->name('customer.')->middleware(['auth', 'tenant.resolution', 'tenant.scope'])->group(function () {
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('customer')
+    ->name('customer.')
+    ->middleware(['auth', 'tenant.resolution'])
+    ->group(function () {
+
     Route::get('/dashboard', [CustomerDashboardController::class, 'dashboard'])->name('dashboard');
-    Route::get('/bookings', function() { return view('customer.dashboard'); })->name('bookings');
-    Route::get('/services', function() { return view('customer.dashboard'); })->name('services');
-    Route::get('/profile', function() { return view('customer.dashboard'); })->name('profile');
-    Route::get('/payments', function() { return view('customer.dashboard'); })->name('payments');
-    Route::get('/support', function() { return view('customer.dashboard'); })->name('support');
+
+    Route::view('/bookings', 'customer.bookings')->name('bookings');
+    Route::view('/services', 'customer.services')->name('services');
+    Route::view('/profile', 'customer.profile')->name('profile');
+    Route::view('/payments', 'customer.payments')->name('payments');
+    Route::view('/support', 'customer.support')->name('support');
 });

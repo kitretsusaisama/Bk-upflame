@@ -2,13 +2,11 @@
 
 namespace App\Domains\Access\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 use App\Domains\Identity\Models\Tenant;
 
-class Role extends Model
+class Role extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'tenant_id',
@@ -43,5 +41,10 @@ class Role extends Model
     public function hasPermission(string $permission): bool
     {
         return $this->permissions->contains('name', $permission);
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\RoleFactory::new();
     }
 }

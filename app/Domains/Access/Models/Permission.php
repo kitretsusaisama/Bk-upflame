@@ -2,12 +2,10 @@
 
 namespace App\Domains\Access\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 
-class Permission extends Model
+class Permission extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'name',
@@ -19,5 +17,10 @@ class Permission extends Model
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_permissions')->withTimestamps();
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\PermissionFactory::new();
     }
 }

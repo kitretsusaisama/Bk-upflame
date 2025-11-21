@@ -2,12 +2,10 @@
 
 namespace App\Domains\Identity\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Support\BaseModel;
 
-class MfaMethod extends Model
+class MfaMethod extends BaseModel
 {
-    use HasUuids;
 
     protected $fillable = [
         'user_id',

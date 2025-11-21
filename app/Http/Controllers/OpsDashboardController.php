@@ -16,7 +16,14 @@ class OpsDashboardController extends Controller
 
     public function dashboard()
     {
-        $tenantId = app('tenant')->id ?? auth()->user()->tenant_id;
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenant = app('tenant');
+        $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        
+        // If we still don't have a tenant ID, throw an exception
+        if (!$tenantId) {
+            abort(403, 'Tenant not found');
+        }
 
         $menuItems = [
             ['label' => 'Dashboard', 'route' => 'ops.dashboard', 'icon' => '📊'],

@@ -76,7 +76,15 @@ function initDropdowns() {
     }
     
     // Close dropdowns when clicking outside
-    document.addEventListener('click', function() {
+    document.addEventListener('click', function(event) {
+        // Don't close dropdowns if clicking inside a dropdown
+        if (notificationDropdown && notificationDropdown.contains(event.target)) {
+            return;
+        }
+        if (userDropdown && userDropdown.contains(event.target)) {
+            return;
+        }
+        
         if (notificationDropdown) notificationDropdown.style.display = 'none';
         if (userDropdown) userDropdown.style.display = 'none';
     });

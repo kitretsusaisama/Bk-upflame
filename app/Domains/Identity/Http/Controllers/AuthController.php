@@ -66,8 +66,23 @@ class AuthController
     public function register(RegisterRequest $request): JsonResponse
     {
         try {
+            // Safely get tenant ID from the tenant binding or request
+            $tenant = app('tenant');
+            $tenantId = $request->tenant_id ?? ($tenant ? $tenant->id : null);
+            
+            // If we still don't have a tenant ID, throw an exception
+            if (!$tenantId) {
+                return response()->json([
+                    'status' => 'error',
+                    'error' => [
+                        'code' => 'TENANT_NOT_FOUND',
+                        'message' => 'Tenant not found'
+                    ]
+                ], 403);
+            }
+            
             $user = $this->authService->createUser([
-                'tenant_id' => $request->tenant_id ?? app('tenant')->id,
+                'tenant_id' => $tenantId,
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
                 'status' => 'pending'
