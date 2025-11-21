@@ -17,7 +17,6 @@ class SuperAdminController extends Controller
     ) {
         $this->tenantRepository = $tenantRepository;
         $this->userRepository = $userRepository;
-        $this->middleware('auth');
     }
 
     public function dashboard()
@@ -50,6 +49,14 @@ class SuperAdminController extends Controller
         $tenants = $this->tenantRepository->findAll(20);
 
         return view('superadmin.tenants', compact('menuItems', 'tenants'));
+    }
+
+    public function users()
+    {
+        $menuItems = $this->getMenuItems();
+        $users = $this->userRepository->findAll(20);
+
+        return view('superadmin.users', compact('menuItems', 'users'));
     }
 
     public function system()

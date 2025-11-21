@@ -12,7 +12,6 @@ class OpsDashboardController extends Controller
     public function __construct(WorkflowRepository $workflowRepository)
     {
         $this->workflowRepository = $workflowRepository;
-        $this->middleware('auth');
     }
 
     public function dashboard()

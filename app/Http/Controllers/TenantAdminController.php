@@ -25,7 +25,6 @@ class TenantAdminController extends Controller
         $this->providerRepository = $providerRepository;
         $this->bookingRepository = $bookingRepository;
         $this->workflowRepository = $workflowRepository;
-        $this->middleware('auth');
     }
 
     public function dashboard()
@@ -53,5 +52,28 @@ class TenantAdminController extends Controller
         $pendingWorkflows = $this->workflowRepository->findByStatus('pending', $tenantId, 5);
 
         return view('tenantadmin.dashboard', compact('menuItems', 'stats', 'users', 'pendingWorkflows'));
+    }
+
+    public function users()
+    {
+        $tenantId = app('tenant')->id ?? auth()->user()->tenant_id;
+
+        $menuItems = $this->getMenuItems();
+        $users = $this->userRepository->findByTenant($tenantId, 20);
+
+        return view('tenantadmin.users', compact('menuItems', 'users'));
+    }
+
+    protected function getMenuItems()
+    {
+        return [
+            ['label' => 'Dashboard', 'route' => 'tenantadmin.dashboard', 'icon' => '📊'],
+            ['label' => 'Users', 'route' => 'tenantadmin.users', 'icon' => '👥'],
+            ['label' => 'Providers', 'route' => 'tenantadmin.providers', 'icon' => '🔧'],
+            ['label' => 'Bookings', 'route' => 'tenantadmin.bookings', 'icon' => '📅'],
+            ['separator' => true, 'label' => 'Management'],
+            ['label' => 'Roles & Permissions', 'route' => 'tenantadmin.roles', 'icon' => '🔑'],
+            ['label' => 'Settings', 'route' => 'tenantadmin.settings', 'icon' => '⚙️'],
+        ];
     }
 }

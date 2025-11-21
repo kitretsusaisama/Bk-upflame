@@ -12,7 +12,6 @@ class CustomerDashboardController extends Controller
     public function __construct(BookingRepository $bookingRepository)
     {
         $this->bookingRepository = $bookingRepository;
-        $this->middleware('auth');
     }
 
     public function dashboard()
