@@ -3,6 +3,8 @@
 namespace App\Console\Commands\Tenant;
 
 use Illuminate\Console\Command;
+use App\Domains\Tenant\Models\Tenant;
+use Illuminate\Support\Facades\Artisan;
 
 class MigrateTenantCommand extends Command
 {
@@ -33,16 +35,50 @@ class MigrateTenantCommand extends Command
         
         if ($tenantId) {
             // Run migrations for a specific tenant
-            $this->info("Running migrations for tenant ID: {$tenantId}");
+            $tenant = Tenant::find($tenantId);
+            
+            if (!$tenant) {
+                $this->error("Tenant with ID {$tenantId} not found!");
+                return 1;
+            }
+            
+            $this->info("Running migrations for tenant: {$tenant->name} (ID: {$tenantId})");
+            
+            // Run migrations for the tenant
+            $options = [];
+            if ($fresh) {
+                $options['--fresh'] = true;
+            }
+            
+            Artisan::call('migrate', $options);
+            $this->info(Artisan::output());
+            
+            // Seed data if requested
+            if ($seed) {
+                Artisan::call('db:seed');
+                $this->info(Artisan::output());
+            }
         } else {
             // Run migrations for all tenants
             $this->info("Running migrations for all tenants");
+            
+            // Run migrations
+            $options = [];
+            if ($fresh) {
+                $options['--fresh'] = true;
+            }
+            
+            Artisan::call('migrate', $options);
+            $this->info(Artisan::output());
+            
+            // Seed data if requested
+            if ($seed) {
+                Artisan::call('db:seed');
+                $this->info(Artisan::output());
+            }
         }
         
-        // This would typically involve:
-        // 1. If using separate databases per tenant, switching to the tenant's database
-        // 2. Running Laravel's migration commands
-        // 3. Optionally seeding data
+        $this->info('Migrations completed successfully!');
         
         return 0;
     }

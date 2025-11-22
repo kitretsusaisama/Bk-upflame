@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Domain\Booking\Models\Booking;
+use App\Domains\Booking\Models\Booking;
 use App\Domain\Identity\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 

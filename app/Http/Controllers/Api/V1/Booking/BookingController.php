@@ -30,7 +30,7 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'scheduled_at' => 'required|date',
             'duration' => 'required|integer',
@@ -38,7 +38,6 @@ class BookingController extends Controller
         ]);
         
         // Add tenant_id from the authenticated user
-        $data = $request->validated();
         $data['user_id'] = $request->user()->id;
         $data['tenant_id'] = $request->user()->tenant_id;
         
@@ -67,14 +66,14 @@ class BookingController extends Controller
      */
     public function update(Request $request, Booking $booking)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'scheduled_at' => 'sometimes|date',
             'duration' => 'sometimes|integer',
             'status' => 'sometimes|string',
             // Add other validation rules as needed
         ]);
         
-        $booking->update($request->validated());
+        $booking->update($updateData);
         
         return new BookingResource($booking);
     }

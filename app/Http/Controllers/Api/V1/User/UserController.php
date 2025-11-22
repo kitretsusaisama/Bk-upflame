@@ -30,13 +30,13 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
             // Add other validation rules as needed
         ]);
         
-        $user = User::create($request->validated());
+        $user = User::create($data);
         
         return new UserResource($user);
     }
@@ -61,12 +61,12 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             // Add other validation rules as needed
         ]);
         
-        $user->update($request->validated());
+        $user->update($updateData);
         
         return new UserResource($user);
     }

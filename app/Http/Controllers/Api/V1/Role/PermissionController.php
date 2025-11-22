@@ -31,7 +31,7 @@ class PermissionController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|unique:permissions',
             'resource' => 'required|string',
@@ -40,7 +40,7 @@ class PermissionController extends Controller
             // Add other validation rules as needed
         ]);
         
-        $permission = Permission::create($request->validated());
+        $permission = Permission::create($data);
         
         return response()->json([
             'message' => 'Permission created successfully',
@@ -70,7 +70,7 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission): JsonResponse
     {
-        $request->validate([
+        $updateData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'slug' => 'sometimes|string|unique:permissions,slug,' . $permission->id,
             'resource' => 'sometimes|string',
@@ -79,7 +79,7 @@ class PermissionController extends Controller
             // Add other validation rules as needed
         ]);
         
-        $permission->update($request->validated());
+        $permission->update($updateData);
         
         return response()->json([
             'message' => 'Permission updated successfully',

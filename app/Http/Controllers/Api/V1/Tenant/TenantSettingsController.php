@@ -16,7 +16,17 @@ class TenantSettingsController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $tenant = $request->tenant(); // Assuming tenant is resolved from middleware
+        $tenantId = $request->attributes->get('tenant_id');
+        
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant not found'], 404);
+        }
+        
+        $tenant = \App\Domains\Tenant\Models\Tenant::find($tenantId);
+        
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant not found'], 404);
+        }
         
         return response()->json([
             'settings' => $tenant->settings
@@ -31,14 +41,24 @@ class TenantSettingsController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
-        $tenant = $request->tenant(); // Assuming tenant is resolved from middleware
+        $tenantId = $request->attributes->get('tenant_id');
         
-        $request->validate([
+        if (!$tenantId) {
+            return response()->json(['message' => 'Tenant not found'], 404);
+        }
+        
+        $tenant = \App\Domains\Tenant\Models\Tenant::find($tenantId);
+        
+        if (!$tenant) {
+            return response()->json(['message' => 'Tenant not found'], 404);
+        }
+        
+        $validatedData = $request->validate([
             'settings' => 'required|array',
             // Add specific validation rules for settings as needed
         ]);
         
-        $tenant->update(['settings' => $request->input('settings')]);
+        $tenant->update(['settings' => $validatedData['settings']]);
         
         return response()->json([
             'message' => 'Tenant settings updated successfully',

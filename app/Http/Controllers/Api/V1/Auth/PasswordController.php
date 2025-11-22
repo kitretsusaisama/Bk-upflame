@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api\V1\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
@@ -20,12 +23,20 @@ class PasswordController extends Controller
             'email' => 'required|email'
         ]);
         
-        // Implementation for sending password reset link
-        // This would typically use Laravel's built-in password reset functionality
+        // Send password reset link using Laravel's built-in password reset functionality
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+        
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => 'Password reset link sent to your email'
+            ]);
+        }
         
         return response()->json([
-            'message' => 'Password reset link sent to your email'
-        ]);
+            'message' => 'Failed to send password reset link'
+        ], 400);
     }
 
     /**
@@ -42,11 +53,26 @@ class PasswordController extends Controller
             'password' => 'required|min:8|confirmed'
         ]);
         
-        // Implementation for resetting password
-        // This would typically use Laravel's built-in password reset functionality
+        // Reset password using Laravel's built-in password reset functionality
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+                
+                $user->save();
+            }
+        );
+        
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Password reset successfully'
+            ]);
+        }
         
         return response()->json([
-            'message' => 'Password reset successfully'
-        ]);
+            'message' => 'Failed to reset password'
+        ], 400);
     }
 }

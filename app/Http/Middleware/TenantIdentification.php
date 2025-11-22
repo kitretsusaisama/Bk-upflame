@@ -22,8 +22,13 @@ class TenantIdentification
         
         // If tenant identified, set in application context
         if ($tenantId) {
-            // Here you would typically set the tenant context
-            // For example: app()->singleton('tenant', function() use ($tenantId) { ... });
+            // Set the tenant context in the application
+            app()->singleton('tenant.id', function() use ($tenantId) {
+                return $tenantId;
+            });
+            
+            // Also set it in the request for easy access
+            $request->attributes->set('tenant_id', $tenantId);
         }
         
         return $next($request);

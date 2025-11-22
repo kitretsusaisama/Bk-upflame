@@ -30,13 +30,13 @@ class ProviderController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'type' => 'required|string',
             'status' => 'required|string',
             // Add other validation rules as needed
         ]);
         
-        $provider = Provider::create($request->validated());
+        $provider = Provider::create($data);
         
         return new ProviderResource($provider);
     }
@@ -61,13 +61,13 @@ class ProviderController extends Controller
      */
     public function update(Request $request, Provider $provider)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'type' => 'sometimes|string',
             'status' => 'sometimes|string',
             // Add other validation rules as needed
         ]);
         
-        $provider->update($request->validated());
+        $provider->update($updateData);
         
         return new ProviderResource($provider);
     }

@@ -85,4 +85,24 @@ class AuthenticationService
     {
         $user->tokens()->delete();
     }
+
+    public function login(array $credentials): array
+    {
+        $user = $this->authenticate($credentials['email'], $credentials['password']);
+        
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ];
+        }
+        
+        $token = $this->createAccessToken($user);
+        
+        return [
+            'success' => true,
+            'user' => $user,
+            'token' => $token
+        ];
+    }
 }

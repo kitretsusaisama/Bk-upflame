@@ -7,6 +7,7 @@ use App\Domain\Notification\Models\Notification;
 use App\Http\Resources\NotificationResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Domains\Notification\Services\NotificationService;
 
 class NotificationController extends Controller
 {
@@ -28,9 +29,9 @@ class NotificationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, NotificationService $notificationService): JsonResponse
     {
-        $request->validate([
+        $data = $request->validate([
             'type' => 'required|string',
             'channel' => 'required|string',
             'subject' => 'required|string',
@@ -39,12 +40,15 @@ class NotificationController extends Controller
             // Add other validation rules as needed
         ]);
         
-        // Implementation for sending a notification
-        // This would typically use the NotificationService to send the notification
+        // Add tenant_id from the authenticated user
+        $data['tenant_id'] = $request->user()->tenant_id;
+        
+        // Send the notification using the NotificationService
+        $notification = $notificationService->send($data);
         
         return response()->json([
             'message' => 'Notification sent successfully',
-            'notification_id' => null // Would contain the new notification ID
+            'notification_id' => $notification->id
         ], 201);
     }
 

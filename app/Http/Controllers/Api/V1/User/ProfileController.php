@@ -29,7 +29,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request): JsonResponse
     {
-        $request->validate([
+        $data = $request->validate([
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|string|max:20',
@@ -37,7 +37,7 @@ class ProfileController extends Controller
         ]);
         
         $user = $request->user();
-        $user->update($request->validated());
+        $user->update($data);
         
         return response()->json([
             'message' => 'Profile updated successfully',

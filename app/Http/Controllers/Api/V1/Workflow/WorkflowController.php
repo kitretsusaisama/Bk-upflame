@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Workflow;
 
 use App\Http\Controllers\Controller;
-use App\Domain\Workflow\Models\Workflow;
+use App\Domains\Workflow\Models\Workflow;
 use App\Http\Resources\WorkflowResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,9 +15,10 @@ class WorkflowController extends Controller
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        $workflows = Workflow::paginate(15);
+        // Scope the workflow listing to the authenticated tenant
+        $workflows = Workflow::where('tenant_id', $request->user()->tenant_id)->paginate(15);
         
         return WorkflowResource::collection($workflows);
     }
@@ -30,7 +31,7 @@ class WorkflowController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|string',
@@ -38,7 +39,7 @@ class WorkflowController extends Controller
         ]);
         
         // Add tenant_id from the authenticated user
-        $data = $request->validated();
+        $data = $validatedData;
         $data['tenant_id'] = $request->user()->tenant_id;
         
         $workflow = Workflow::create($data);
@@ -49,7 +50,7 @@ class WorkflowController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Domain\Workflow\Models\Workflow  $workflow
+     * @param  \App\Domains\Workflow\Models\Workflow  $workflow
      * @return \App\Http\Resources\WorkflowResource
      */
     public function show(Workflow $workflow)
@@ -61,19 +62,19 @@ class WorkflowController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Domain\Workflow\Models\Workflow  $workflow
+     * @param  \App\Domains\Workflow\Models\Workflow  $workflow
      * @return \App\Http\Resources\WorkflowResource
      */
     public function update(Request $request, Workflow $workflow)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'status' => 'sometimes|string',
             // Add other validation rules as needed
         ]);
         
-        $workflow->update($request->validated());
+        $workflow->update($updateData);
         
         return new WorkflowResource($workflow);
     }
@@ -81,7 +82,7 @@ class WorkflowController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Domain\Workflow\Models\Workflow  $workflow
+     * @param  \App\Domains\Workflow\Models\Workflow  $workflow
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Workflow $workflow)

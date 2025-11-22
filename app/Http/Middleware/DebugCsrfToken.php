@@ -16,14 +16,14 @@ class DebugCsrfToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Log CSRF token information
+        // Log CSRF token information (without sensitive data)
         Log::info('CSRF Debug Info', [
             'url' => $request->fullUrl(),
             'method' => $request->method(),
-            'session_token' => $request->session()->token() ?? 'No session token',
-            'request_token' => $request->input('_token') ?? $request->header('X-CSRF-TOKEN') ?? 'No request token',
-            'cookies' => $request->cookies->all(),
-            'session_id' => $request->session()->getId() ?? 'No session ID',
+            'has_session_token' => !empty($request->session()->token()),
+            'has_request_token' => !empty($request->input('_token') ?? $request->header('X-CSRF-TOKEN')),
+            'has_cookies' => !empty($request->cookies->all()),
+            'has_session_id' => !empty($request->session()->getId()),
         ]);
 
         $response = $next($request);

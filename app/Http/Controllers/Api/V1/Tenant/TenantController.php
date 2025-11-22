@@ -30,14 +30,14 @@ class TenantController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|unique:tenants',
             'domain' => 'required|string|unique:tenants',
             // Add other validation rules as needed
         ]);
         
-        $tenant = Tenant::create($request->validated());
+        $tenant = Tenant::create($data);
         
         return new TenantResource($tenant);
     }
@@ -62,14 +62,14 @@ class TenantController extends Controller
      */
     public function update(Request $request, Tenant $tenant)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'name' => 'sometimes|string|max:255',
             'slug' => 'sometimes|string|unique:tenants,slug,' . $tenant->id,
             'domain' => 'sometimes|string|unique:tenants,domain,' . $tenant->id,
             // Add other validation rules as needed
         ]);
         
-        $tenant->update($request->validated());
+        $tenant->update($updateData);
         
         return new TenantResource($tenant);
     }

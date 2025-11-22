@@ -60,7 +60,7 @@ class Role extends Model
     {
         return $this->belongsToMany(
             \App\Domains\Identity\Models\User::class,
-            'role_user',
+            'user_roles',
             'role_id',
             'user_id'
         )->withTimestamps();

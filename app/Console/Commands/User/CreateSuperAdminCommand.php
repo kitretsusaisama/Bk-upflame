@@ -3,6 +3,9 @@
 namespace App\Console\Commands\User;
 
 use Illuminate\Console\Command;
+use App\Domains\Identity\Models\User;
+use App\Domains\Access\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class CreateSuperAdminCommand extends Command
 {
@@ -31,13 +34,31 @@ class CreateSuperAdminCommand extends Command
         $name = $this->argument('name');
         $password = $this->argument('password');
         
-        // Logic to create a super admin user
-        $this->info("Creating super admin user: {$name} ({$email})");
+        // Check if user already exists
+        if (User::where('email', $email)->exists()) {
+            $this->error("User with email {$email} already exists!");
+            return 1;
+        }
         
-        // This would typically involve:
-        // 1. Creating a user record with super admin privileges
-        // 2. Assigning the super admin role
-        // 3. Setting the password
+        // Create the super admin user
+        $user = User::create([
+            'email' => $email,
+            'password' => Hash::make($password),
+            'status' => 'active',
+        ]);
+        
+        // Create or get the super admin role
+        $role = Role::firstOrCreate([
+            'name' => 'Super Admin',
+            'description' => 'Super administrator with full access',
+            'is_system' => true,
+        ]);
+        
+        // Assign the role to the user
+        $user->roles()->attach($role->id);
+        
+        $this->info("Super admin user created successfully: {$name} ({$email})");
+        $this->info("Role assigned: {$role->name}");
         
         return 0;
     }

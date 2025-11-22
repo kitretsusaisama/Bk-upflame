@@ -30,14 +30,13 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|unique:roles',
             'description' => 'nullable|string',
             // Add other validation rules as needed
         ]);
         
-        $role = Role::create($request->validated());
+        $role = Role::create($data);
         
         return new RoleResource($role);
     }
@@ -62,14 +61,13 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        $request->validate([
+        $updateData = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'slug' => 'sometimes|string|unique:roles,slug,' . $role->id,
             'description' => 'nullable|string',
             // Add other validation rules as needed
         ]);
         
-        $role->update($request->validated());
+        $role->update($updateData);
         
         return new RoleResource($role);
     }
