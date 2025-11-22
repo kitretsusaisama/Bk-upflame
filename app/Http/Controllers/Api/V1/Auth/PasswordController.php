@@ -28,15 +28,13 @@ class PasswordController extends Controller
             $request->only('email')
         );
         
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Password reset link sent to your email'
-            ]);
-        }
+        // Always return the same generic message to prevent user enumeration
+        // Log the real status internally for debugging purposes
+        \Illuminate\Support\Facades\Log::info('Password reset link status: ' . $status . ' for email: ' . $request->email);
         
         return response()->json([
-            'message' => 'Failed to send password reset link'
-        ], 400);
+            'message' => 'If your email exists in our system, you will receive a password reset link shortly.'
+        ]);
     }
 
     /**

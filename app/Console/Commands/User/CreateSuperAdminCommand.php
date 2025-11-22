@@ -42,17 +42,20 @@ class CreateSuperAdminCommand extends Command
         
         // Create the super admin user
         $user = User::create([
+            'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
             'status' => 'active',
         ]);
         
         // Create or get the super admin role
-        $role = Role::firstOrCreate([
-            'name' => 'Super Admin',
-            'description' => 'Super administrator with full access',
-            'is_system' => true,
-        ]);
+        $role = Role::firstOrCreate(
+            ['name' => 'Super Admin'], // Only search by name
+            [
+                'description' => 'Super administrator with full access',
+                'is_system' => true,
+            ]
+        );
         
         // Assign the role to the user
         $user->roles()->attach($role->id);

@@ -88,21 +88,29 @@ class AuthenticationService
 
     public function login(array $credentials): array
     {
-        $user = $this->authenticate($credentials['email'], $credentials['password']);
-        
-        if (!$user) {
+        try {
+            $user = $this->authenticate($credentials['email'], $credentials['password']);
+            
+            if (!$user) {
+                return [
+                    'success' => false,
+                    'message' => 'Invalid credentials'
+                ];
+            }
+            
+            $token = $this->createAccessToken($user);
+            
+            return [
+                'success' => true,
+                'user' => $user,
+                'token' => $token
+            ];
+        } catch (\Exception $e) {
+            // Catch exceptions like locked/inactive accounts and return structured response
             return [
                 'success' => false,
-                'message' => 'Invalid credentials'
+                'message' => $e->getMessage()
             ];
         }
-        
-        $token = $this->createAccessToken($user);
-        
-        return [
-            'success' => true,
-            'user' => $user,
-            'token' => $token
-        ];
     }
 }

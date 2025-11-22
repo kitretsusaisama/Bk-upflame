@@ -5,6 +5,7 @@ namespace App\Console\Commands\Tenant;
 use Illuminate\Console\Command;
 use App\Domains\Tenant\Models\Tenant;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\App;
 
 class MigrateTenantCommand extends Command
 {
@@ -44,19 +45,34 @@ class MigrateTenantCommand extends Command
             
             $this->info("Running migrations for tenant: {$tenant->name} (ID: {$tenantId})");
             
+            // Set tenant context for proper scoping
+            App::singleton('tenant.id', function() use ($tenantId) {
+                return $tenantId;
+            });
+            
             // Run migrations for the tenant
             $options = [];
             if ($fresh) {
                 $options['--fresh'] = true;
             }
             
-            Artisan::call('migrate', $options);
+            $migrateResult = Artisan::call('migrate', $options);
             $this->info(Artisan::output());
+            
+            if ($migrateResult !== 0) {
+                $this->error('Migration failed!');
+                return $migrateResult;
+            }
             
             // Seed data if requested
             if ($seed) {
-                Artisan::call('db:seed');
+                $seedResult = Artisan::call('db:seed');
                 $this->info(Artisan::output());
+                
+                if ($seedResult !== 0) {
+                    $this->error('Seeding failed!');
+                    return $seedResult;
+                }
             }
         } else {
             // Run migrations for all tenants
@@ -68,13 +84,23 @@ class MigrateTenantCommand extends Command
                 $options['--fresh'] = true;
             }
             
-            Artisan::call('migrate', $options);
+            $migrateResult = Artisan::call('migrate', $options);
             $this->info(Artisan::output());
+            
+            if ($migrateResult !== 0) {
+                $this->error('Migration failed!');
+                return $migrateResult;
+            }
             
             // Seed data if requested
             if ($seed) {
-                Artisan::call('db:seed');
+                $seedResult = Artisan::call('db:seed');
                 $this->info(Artisan::output());
+                
+                if ($seedResult !== 0) {
+                    $this->error('Seeding failed!');
+                    return $seedResult;
+                }
             }
         }
         

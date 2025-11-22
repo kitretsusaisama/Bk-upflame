@@ -15,10 +15,6 @@ trait HasUuid
             if (!isset($model->$uuidColumn) || empty($model->$uuidColumn)) {
                 $uuid = Str::uuid()->toString();
                 $model->$uuidColumn = $uuid;
-                // Add some debugging to see if this is working
-                \Illuminate\Support\Facades\Log::info('HasUuid: Setting ' . $uuidColumn . ' to ' . $uuid . ' for model ' . get_class($model));
-            } else {
-                \Illuminate\Support\Facades\Log::info('HasUuid: ' . $uuidColumn . ' already set to ' . $model->$uuidColumn . ' for model ' . get_class($model));
             }
         });
     }
