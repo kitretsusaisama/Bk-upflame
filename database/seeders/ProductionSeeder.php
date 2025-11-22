@@ -9,14 +9,13 @@ use App\Domains\Access\Models\Role;
 use App\Domains\Access\Models\Permission;
 use App\Domains\Provider\Models\Provider;
 use App\Domains\Booking\Models\Service;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ProductionSeeder extends Seeder
 {
-    use WithoutModelEvents;
 
     /**
      * Run the database seeds.
@@ -28,7 +27,7 @@ class ProductionSeeder extends Seeder
             'domain' => 'default.local'
         ], [
             'name' => 'Default Tenant',
-            'slug' => 'default-tenant', // Add slug field
+            'slug' => 'default-tenant',
             'status' => 'active',
             'config_json' => json_encode([
                 'timezone' => 'Asia/Kolkata',
@@ -39,16 +38,16 @@ class ProductionSeeder extends Seeder
 
         // Create permissions
         $permissions = $this->createPermissions();
-
+        
         // Create roles
         $roles = $this->createRoles($tenant, $permissions);
-
+        
         // Create users
         $users = $this->createUsers($tenant, $roles);
-
+        
         // Create providers
         $providers = $this->createProviders($tenant, $users);
-
+        
         // Create services
         $services = $this->createServices($tenant);
 
@@ -112,10 +111,18 @@ class ProductionSeeder extends Seeder
 
         $permissions = [];
         foreach ($permissionData as $permission) {
-            $permissions[$permission['name']] = Permission::firstOrCreate(
-                ['name' => $permission['name']],
-                $permission
-            );
+            // Check if permission already exists
+            $existingPermission = Permission::where('name', $permission['name'])->first();
+            
+            if ($existingPermission) {
+                $permissions[$permission['name']] = $existingPermission;
+            } else {
+                // Explicitly set the UUID before creating the permission
+                $permission['id'] = \Illuminate\Support\Str::uuid()->toString();
+                // Create new permission with explicit UUID
+                $newPermission = Permission::create($permission);
+                $permissions[$permission['name']] = $newPermission;
+            }
         }
 
         return $permissions;
@@ -132,12 +139,18 @@ class ProductionSeeder extends Seeder
             'name' => 'Super Admin',
             'role_family' => 'Internal'
         ], [
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'description' => 'Super administrator with full access to all features',
             'is_system' => true
         ]);
 
+        $this->command->info('Super Admin Role ID: ' . $superAdminRole->id);
+
         // Attach all permissions to Super Admin
-        $superAdminRole->permissions()->sync(collect(array_values($permissions))->pluck('id')->toArray());
+        $permissionIds = collect(array_values($permissions))->pluck('id')->toArray();
+        $validPermissionIds = $this->getValidPermissionIds($permissionIds);
+        $this->command->info('Super Admin Valid Permission IDs: ' . implode(', ', $validPermissionIds));
+        $superAdminRole->permissions()->sync($validPermissionIds);
 
         // Tenant Admin Role
         $tenantAdminRole = Role::firstOrCreate([
@@ -145,6 +158,7 @@ class ProductionSeeder extends Seeder
             'name' => 'Tenant Admin',
             'role_family' => 'Internal'
         ], [
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'description' => 'Tenant administrator with access to tenant management features',
             'is_system' => true
         ]);
@@ -169,7 +183,8 @@ class ProductionSeeder extends Seeder
             ->values()
             ->toArray();
 
-        $tenantAdminRole->permissions()->sync($tenantAdminPermissionIds);
+        $validTenantAdminPermissionIds = $this->getValidPermissionIds($tenantAdminPermissionIds);
+        $tenantAdminRole->permissions()->sync($validTenantAdminPermissionIds);
 
         // Provider Role
         $providerRole = Role::firstOrCreate([
@@ -177,6 +192,7 @@ class ProductionSeeder extends Seeder
             'name' => 'Provider',
             'role_family' => 'Provider'
         ], [
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'description' => 'Service provider role',
             'is_system' => true
         ]);
@@ -195,7 +211,8 @@ class ProductionSeeder extends Seeder
             ->values()
             ->toArray();
 
-        $providerRole->permissions()->sync($providerPermissionIds);
+        $validProviderPermissionIds = $this->getValidPermissionIds($providerPermissionIds);
+        $providerRole->permissions()->sync($validProviderPermissionIds);
 
         // Customer Role
         $customerRole = Role::firstOrCreate([
@@ -203,6 +220,7 @@ class ProductionSeeder extends Seeder
             'name' => 'Customer',
             'role_family' => 'Customer'
         ], [
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'description' => 'End customer role',
             'is_system' => true
         ]);
@@ -220,7 +238,8 @@ class ProductionSeeder extends Seeder
             ->values()
             ->toArray();
 
-        $customerRole->permissions()->sync($customerPermissionIds);
+        $validCustomerPermissionIds = $this->getValidPermissionIds($customerPermissionIds);
+        $customerRole->permissions()->sync($validCustomerPermissionIds);
 
         // Premium Customer Role
         $premiumCustomerRole = Role::firstOrCreate([
@@ -228,6 +247,7 @@ class ProductionSeeder extends Seeder
             'name' => 'Premium Customer',
             'role_family' => 'Customer'
         ], [
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
             'description' => 'Premium customer with additional privileges',
             'is_system' => true
         ]);
@@ -245,7 +265,8 @@ class ProductionSeeder extends Seeder
             ->values()
             ->toArray();
 
-        $premiumCustomerRole->permissions()->sync($premiumCustomerPermissionIds);
+        $validPremiumCustomerPermissionIds = $this->getValidPermissionIds($premiumCustomerPermissionIds);
+        $premiumCustomerRole->permissions()->sync($validPremiumCustomerPermissionIds);
 
         return [
             'super_admin' => $superAdminRole,
@@ -254,6 +275,37 @@ class ProductionSeeder extends Seeder
             'customer' => $customerRole,
             'premium_customer' => $premiumCustomerRole
         ];
+    }
+
+    /**
+     * Validate permission IDs and return only existing ones
+     *
+     * @param array $permissionIds
+     * @return array
+     */
+    private function getValidPermissionIds(array $permissionIds): array
+    {
+        $validPermissionIds = [];
+        $invalidPermissionIds = [];
+
+        foreach ($permissionIds as $permissionId) {
+            // Check if the permission exists in the database
+            if (Permission::where('id', $permissionId)->exists()) {
+                $validPermissionIds[] = $permissionId;
+            } else {
+                $invalidPermissionIds[] = $permissionId;
+            }
+        }
+
+        // Log invalid permission IDs
+        if (!empty($invalidPermissionIds)) {
+            $this->command->warn('Skipping invalid permission IDs: ' . implode(', ', $invalidPermissionIds));
+            Log::warning('Seeder skipping invalid permission IDs', [
+                'invalid_permission_ids' => $invalidPermissionIds
+            ]);
+        }
+
+        return $validPermissionIds;
     }
 
     /**
@@ -282,12 +334,19 @@ class ProductionSeeder extends Seeder
             'phone' => '+1234567890'
         ]);
 
-        // Assign Super Admin role
-        $superAdminUser->roles()->attach($roles['super_admin']->id, [
-            'id' => Str::uuid(),
-            'tenant_id' => $tenant->id,
-            'assigned_by' => $superAdminUser->id
-        ]);
+        // Assign Super Admin role (only if role exists)
+        if (Role::where('id', $roles['super_admin']->id)->exists()) {
+            $superAdminUser->roles()->attach($roles['super_admin']->id, [
+                'id' => Str::uuid(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $superAdminUser->id
+            ]);
+        } else {
+            $this->command->warn('Skipping assignment of invalid Super Admin role ID: ' . $roles['super_admin']->id);
+            Log::warning('Seeder skipping invalid Super Admin role ID', [
+                'invalid_role_id' => $roles['super_admin']->id
+            ]);
+        }
 
         // Tenant Admin User
         $tenantAdminUser = User::firstOrCreate([
@@ -298,7 +357,7 @@ class ProductionSeeder extends Seeder
             'status' => 'active',
             'mfa_enabled' => false,
             'email_verified' => true,
-            'primary_role_id' => $roles['tenant_admin']->id
+            'primary_role_id' => $roles['tenant_admin']->id ?? null
         ]);
 
         // Create user profile for Tenant Admin
@@ -310,12 +369,20 @@ class ProductionSeeder extends Seeder
             'phone' => '+1234567891'
         ]);
 
-        // Assign Tenant Admin role
-        $tenantAdminUser->roles()->attach($roles['tenant_admin']->id, [
-            'id' => Str::uuid(),
-            'tenant_id' => $tenant->id,
-            'assigned_by' => $superAdminUser->id
-        ]);
+        // Assign Tenant Admin role (only if role exists)
+        if (isset($roles['tenant_admin']) && Role::where('id', $roles['tenant_admin']->id)->exists()) {
+            $tenantAdminUser->roles()->attach($roles['tenant_admin']->id, [
+                'id' => Str::uuid(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $superAdminUser->id
+            ]);
+        } else {
+            $roleId = $roles['tenant_admin']->id ?? 'undefined';
+            $this->command->warn('Skipping assignment of invalid Tenant Admin role ID: ' . $roleId);
+            Log::warning('Seeder skipping invalid Tenant Admin role ID', [
+                'invalid_role_id' => $roleId
+            ]);
+        }
 
         // Provider User
         $providerUser = User::firstOrCreate([
@@ -326,7 +393,7 @@ class ProductionSeeder extends Seeder
             'status' => 'active',
             'mfa_enabled' => false,
             'email_verified' => true,
-            'primary_role_id' => $roles['provider']->id
+            'primary_role_id' => $roles['provider']->id ?? null
         ]);
 
         // Create user profile for Provider
@@ -338,12 +405,20 @@ class ProductionSeeder extends Seeder
             'phone' => '+1234567892'
         ]);
 
-        // Assign Provider role
-        $providerUser->roles()->attach($roles['provider']->id, [
-            'id' => Str::uuid(),
-            'tenant_id' => $tenant->id,
-            'assigned_by' => $tenantAdminUser->id
-        ]);
+        // Assign Provider role (only if role exists)
+        if (isset($roles['provider']) && Role::where('id', $roles['provider']->id)->exists()) {
+            $providerUser->roles()->attach($roles['provider']->id, [
+                'id' => Str::uuid(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $tenantAdminUser->id
+            ]);
+        } else {
+            $roleId = $roles['provider']->id ?? 'undefined';
+            $this->command->warn('Skipping assignment of invalid Provider role ID: ' . $roleId);
+            Log::warning('Seeder skipping invalid Provider role ID', [
+                'invalid_role_id' => $roleId
+            ]);
+        }
 
         // Customer User
         $customerUser = User::firstOrCreate([
@@ -354,7 +429,7 @@ class ProductionSeeder extends Seeder
             'status' => 'active',
             'mfa_enabled' => false,
             'email_verified' => true,
-            'primary_role_id' => $roles['customer']->id
+            'primary_role_id' => $roles['customer']->id ?? null
         ]);
 
         // Create user profile for Customer
@@ -366,12 +441,20 @@ class ProductionSeeder extends Seeder
             'phone' => '+1234567893'
         ]);
 
-        // Assign Customer role
-        $customerUser->roles()->attach($roles['customer']->id, [
-            'id' => Str::uuid(),
-            'tenant_id' => $tenant->id,
-            'assigned_by' => $tenantAdminUser->id
-        ]);
+        // Assign Customer role (only if role exists)
+        if (isset($roles['customer']) && Role::where('id', $roles['customer']->id)->exists()) {
+            $customerUser->roles()->attach($roles['customer']->id, [
+                'id' => Str::uuid(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $tenantAdminUser->id
+            ]);
+        } else {
+            $roleId = $roles['customer']->id ?? 'undefined';
+            $this->command->warn('Skipping assignment of invalid Customer role ID: ' . $roleId);
+            Log::warning('Seeder skipping invalid Customer role ID', [
+                'invalid_role_id' => $roleId
+            ]);
+        }
 
         // Premium Customer User
         $premiumCustomerUser = User::firstOrCreate([
@@ -382,7 +465,7 @@ class ProductionSeeder extends Seeder
             'status' => 'active',
             'mfa_enabled' => false,
             'email_verified' => true,
-            'primary_role_id' => $roles['premium_customer']->id
+            'primary_role_id' => $roles['premium_customer']->id ?? null
         ]);
 
         // Create user profile for Premium Customer
@@ -394,12 +477,20 @@ class ProductionSeeder extends Seeder
             'phone' => '+1234567894'
         ]);
 
-        // Assign Premium Customer role
-        $premiumCustomerUser->roles()->attach($roles['premium_customer']->id, [
-            'id' => Str::uuid(),
-            'tenant_id' => $tenant->id,
-            'assigned_by' => $tenantAdminUser->id
-        ]);
+        // Assign Premium Customer role (only if role exists)
+        if (isset($roles['premium_customer']) && Role::where('id', $roles['premium_customer']->id)->exists()) {
+            $premiumCustomerUser->roles()->attach($roles['premium_customer']->id, [
+                'id' => Str::uuid(),
+                'tenant_id' => $tenant->id,
+                'assigned_by' => $tenantAdminUser->id
+            ]);
+        } else {
+            $roleId = $roles['premium_customer']->id ?? 'undefined';
+            $this->command->warn('Skipping assignment of invalid Premium Customer role ID: ' . $roleId);
+            Log::warning('Seeder skipping invalid Premium Customer role ID', [
+                'invalid_role_id' => $roleId
+            ]);
+        }
 
         return [
             'super_admin' => $superAdminUser,
