@@ -2,90 +2,92 @@
 
 namespace App\Domains\Identity\Http\Controllers;
 
-use App\Domains\Identity\Services\AuthenticationService;
-use App\Support\Concerns\DeterminesDashboardRoute;
+use App\Domains\Identity\Services\SsoAdapterManager;
+use App\Domains\Tenant\Services\TenantManager;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\JsonResponse;
 
-class SsoController extends Controller
+class SsoController
 {
-    use DeterminesDashboardRoute;
+    protected $ssoManager;
+    protected $tenantManager;
 
-    protected AuthenticationService $authService;
-
-    public function __construct(AuthenticationService $authService)
+    public function __construct(SsoAdapterManager $ssoManager, TenantManager $tenantManager)
     {
-        $this->authService = $authService;
+        $this->ssoManager = $ssoManager;
+        $this->tenantManager = $tenantManager;
     }
 
-    public function token(Request $request)
+    /**
+     * Redirect to SSO provider
+     *
+     * @param string $provider
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function redirect(string $provider, Request $request): JsonResponse
     {
-        $user = $request->user()->loadMissing('roles');
+        try {
+            $context = [
+                'tenant_id' => $this->tenantManager->getTenantId(),
+                'redirect_url' => $request->input('redirect_url', '/')
+            ];
 
-        $token = Session::get('sso_token') ?? $this->authService->createSsoToken($user);
-        Session::put('sso_token', $token);
+            $redirectUrl = $this->ssoManager->getRedirectUrl($provider, $context);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'token' => $token,
-                'redirect_to' => route($this->determineDashboardRoute($user)),
-            ],
-        ]);
-    }
-
-    public function exchange(Request $request)
-    {
-        $user = $request->user()->loadMissing('roles');
-
-        if (!Session::isStarted()) {
-            Session::start();
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'redirect_url' => $redirectUrl
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'error' => [
+                    'code' => 'SSO_REDIRECT_ERROR',
+                    'message' => $e->getMessage()
+                ]
+            ], 400);
         }
-
-        Session::migrate(true);
-
-        Auth::guard('web')->login($user);
-
-        $token = $this->authService->createSsoToken($user);
-        Session::put('sso_token', $token);
-
-        cookie()->queue(cookie(
-            'sso_token',
-            $token,
-            60 * 24,
-            '/',
-            null,
-            config('session.secure', false),
-            true,
-            false,
-            config('session.same_site') ?? 'lax'
-        ));
-
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'token' => $token,
-                'redirect_to' => route($this->determineDashboardRoute($user)),
-            ],
-        ]);
     }
 
-    public function revoke(Request $request)
+    /**
+     * Handle SSO callback
+     *
+     * @param string $provider
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function callback(string $provider, Request $request): JsonResponse
     {
-        $user = $request->user();
-        $this->authService->revokeTokenByName($user, 'web-session');
+        try {
+            $result = $this->ssoManager->handleCallback($provider, $request);
 
-        Session::forget('sso_token');
-        cookie()->queue(cookie()->forget('sso_token'));
-
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'message' => 'SSO session revoked',
-            ],
-        ]);
+            if ($result['status'] === 'success') {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [
+                        'access_token' => $result['access_token'],
+                        'token_type' => 'Bearer',
+                        'expires_in' => 3600,
+                        'user' => $result['user']
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'error' => $result['error']
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'error' => [
+                    'code' => 'SSO_CALLBACK_ERROR',
+                    'message' => $e->getMessage()
+                ]
+            ], 400);
+        }
     }
 }
-

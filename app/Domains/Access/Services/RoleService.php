@@ -2,9 +2,8 @@
 
 namespace App\Domains\Access\Services;
 
-use App\Domains\Access\Repositories\RoleRepository;
-use App\Domains\Access\Repositories\PermissionRepository;
-use Illuminate\Support\Str;
+use App\Domains\Access\Contracts\RoleRepositoryInterface;
+use App\Domains\Access\Contracts\PermissionRepositoryInterface;
 
 class RoleService
 {
@@ -12,73 +11,100 @@ class RoleService
     protected $permissionRepository;
 
     public function __construct(
-        RoleRepository $roleRepository,
-        PermissionRepository $permissionRepository
+        RoleRepositoryInterface $roleRepository,
+        PermissionRepositoryInterface $permissionRepository
     ) {
         $this->roleRepository = $roleRepository;
         $this->permissionRepository = $permissionRepository;
     }
 
-    public function createRole($data)
+    /**
+     * Create a role for a specific tenant
+     *
+     * @param string $tenantId
+     * @param string $name
+     * @param string $description
+     * @param array $permissionNames
+     * @return mixed
+     */
+    public function createForTenant(string $tenantId, string $name, string $description, array $permissionNames = [])
     {
-        $data['id'] = Str::uuid()->toString();
-        
-        $role = $this->roleRepository->create($data);
-        
-        if (isset($data['permissions']) && is_array($data['permissions'])) {
-            foreach ($data['permissions'] as $permissionName) {
-                $permission = $this->permissionRepository->findByName($permissionName);
-                if ($permission) {
-                    $this->roleRepository->attachPermission($role->id, $permission->id);
-                }
-            }
-        }
-        
-        return $role->load('permissions');
-    }
+        // Create the role
+        $role = $this->roleRepository->create([
+            'tenant_id' => $tenantId,
+            'name' => $name,
+            'description' => $description
+        ]);
 
-    public function updateRole($id, $data)
-    {
-        $role = $this->roleRepository->update($id, $data);
-        
-        if ($role && isset($data['permissions']) && is_array($data['permissions'])) {
+        // Attach permissions if provided
+        if (!empty($permissionNames)) {
             $permissionIds = [];
-            foreach ($data['permissions'] as $permissionName) {
-                $permission = $this->permissionRepository->findByName($permissionName);
+            foreach ($permissionNames as $permissionName) {
+                $permission = $this->permissionRepository->findByName($permissionName, $tenantId);
                 if ($permission) {
                     $permissionIds[] = $permission->id;
                 }
             }
             
-            $role->permissions()->sync($permissionIds);
+            if (!empty($permissionIds)) {
+                $this->roleRepository->attachPermissions($role->id, $permissionIds);
+            }
+        }
+
+        return $role;
+    }
+
+    /**
+     * Assign permissions to a role
+     *
+     * @param string $roleId
+     * @param array $permissionNames
+     * @return void
+     */
+    public function assignPermissions(string $roleId, array $permissionNames): void
+    {
+        $role = $this->roleRepository->findById($roleId);
+        if (!$role) {
+            throw new \Exception("Role not found");
+        }
+
+        $permissionIds = [];
+        foreach ($permissionNames as $permissionName) {
+            $permission = $this->permissionRepository->findByName($permissionName, $role->tenant_id);
+            if ($permission) {
+                $permissionIds[] = $permission->id;
+            }
         }
         
-        return $role ? $role->load('permissions') : null;
+        if (!empty($permissionIds)) {
+            $this->roleRepository->attachPermissions($roleId, $permissionIds);
+        }
     }
 
-    public function deleteRole($id)
+    /**
+     * Remove permissions from a role
+     *
+     * @param string $roleId
+     * @param array $permissionNames
+     * @return void
+     */
+    public function removePermissions(string $roleId, array $permissionNames): void
     {
-        return $this->roleRepository->delete($id);
-    }
+        $role = $this->roleRepository->findById($roleId);
+        if (!$role) {
+            throw new \Exception("Role not found");
+        }
 
-    public function getRolesByTenant($tenantId, $limit = 20)
-    {
-        return $this->roleRepository->findByTenant($tenantId, $limit);
-    }
-
-    public function getRoleById($id)
-    {
-        $role = $this->roleRepository->findById($id);
-        return $role ? $role->load('permissions') : null;
-    }
-
-    public function attachPermission($roleId, $permissionId)
-    {
-        return $this->roleRepository->attachPermission($roleId, $permissionId);
-    }
-
-    public function detachPermission($roleId, $permissionId)
-    {
-        return $this->roleRepository->detachPermission($roleId, $permissionId);
+        $permissionIds = [];
+        foreach ($permissionNames as $permissionName) {
+            $permission = $this->permissionRepository->findByName($permissionName, $role->tenant_id);
+            if ($permission) {
+                $permissionIds[] = $permission->id;
+            }
+        }
+        
+        if (!empty($permissionIds)) {
+            $this->roleRepository->detachPermissions($roleId, $permissionIds);
+        }
     }
 }

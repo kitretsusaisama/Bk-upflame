@@ -4,115 +4,73 @@ namespace App\Domains\Identity\Http\Controllers;
 
 use App\Domains\Identity\Http\Requests\LoginRequest;
 use App\Domains\Identity\Http\Requests\RegisterRequest;
-use App\Domains\Identity\Services\AuthenticationService;
+use App\Domains\Identity\Actions\LoginWithPassword;
+use App\Domains\Identity\Actions\RegisterUser;
+use App\Domains\Identity\Actions\RequestOtp;
+use App\Domains\Identity\Actions\VerifyOtp;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class AuthController
 {
-    protected $authService;
+    protected $loginAction;
+    protected $registerAction;
+    protected $requestOtpAction;
+    protected $verifyOtpAction;
 
-    public function __construct(AuthenticationService $authService)
-    {
-        $this->authService = $authService;
+    public function __construct(
+        LoginWithPassword $loginAction,
+        RegisterUser $registerAction,
+        RequestOtp $requestOtpAction,
+        VerifyOtp $verifyOtpAction
+    ) {
+        $this->loginAction = $loginAction;
+        $this->registerAction = $registerAction;
+        $this->requestOtpAction = $requestOtpAction;
+        $this->verifyOtpAction = $verifyOtpAction;
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
-        try {
-            $user = $this->authService->authenticate(
-                $request->input('email'),
-                $request->input('password'),
-                $request->tenant_id ?? null
-            );
+        $result = $this->loginAction->execute(
+            $request->input('email'),
+            $request->input('password'),
+            $request->tenant_id ?? null
+        );
 
-            if (!$user) {
-                return response()->json([
-                    'status' => 'error',
-                    'error' => [
-                        'code' => 'INVALID_CREDENTIALS',
-                        'message' => 'Invalid email or password'
-                    ]
-                ], 401);
+        // Determine appropriate status code based on error type
+        $statusCode = 200;
+        if ($result['status'] !== 'success') {
+            // Check if it's an authentication error (like inactive account)
+            if (isset($result['error']['code']) && $result['error']['code'] === 'AUTHENTICATION_ERROR') {
+                $statusCode = 400; // Bad Request for authentication errors
+            } else {
+                $statusCode = 401; // Unauthorized for invalid credentials
             }
-
-            $token = $this->authService->createAccessToken($user);
-
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'access_token' => $token,
-                    'token_type' => 'Bearer',
-                    'expires_in' => 3600,
-                    'user' => [
-                        'id' => $user->id,
-                        'email' => $user->email,
-                        'status' => $user->status,
-                        'tenant_id' => $user->tenant_id
-                    ]
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'error' => [
-                    'code' => 'AUTHENTICATION_ERROR',
-                    'message' => $e->getMessage()
-                ]
-            ], 400);
         }
+
+        return response()->json($result, $statusCode);
     }
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        try {
-            // Safely get tenant ID from the tenant binding or request
-            $tenant = app('tenant');
-            $tenantId = $request->tenant_id ?? ($tenant ? $tenant->id : null);
-            
-            // If we still don't have a tenant ID, throw an exception
-            if (!$tenantId) {
-                return response()->json([
-                    'status' => 'error',
-                    'error' => [
-                        'code' => 'TENANT_NOT_FOUND',
-                        'message' => 'Tenant not found'
-                    ]
-                ], 403);
-            }
-            
-            $user = $this->authService->createUser([
-                'tenant_id' => $tenantId,
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
-                'status' => 'pending'
-            ]);
-
-            $user->profile()->create([
-                'tenant_id' => $user->tenant_id,
+        // Safely get tenant ID from the tenant binding or request
+        $tenant = app()->bound('tenant') ? app('tenant') : null;
+        $tenantId = $request->tenant_id ?? ($tenant ? $tenant->id : null);
+        
+        $result = $this->registerAction->execute([
+            'tenant_id' => $tenantId,
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+            'status' => 'pending',
+            'profile' => [
                 'first_name' => $request->input('first_name'),
                 'last_name' => $request->input('last_name'),
                 'phone' => $request->input('phone')
-            ]);
+            ]
+        ]);
 
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'created_at' => $user->created_at
-                ]
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'error' => [
-                    'code' => 'REGISTRATION_ERROR',
-                    'message' => $e->getMessage()
-                ]
-            ], 400);
-        }
+        return response()->json($result, $result['status'] === 'success' ? 201 : 400);
     }
 
     public function logout(Request $request): JsonResponse
@@ -148,5 +106,41 @@ class AuthController
                 'roles' => $user->roles->pluck('name')
             ]
         ]);
+    }
+
+    public function requestOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $tenant = app()->bound('tenant') ? app('tenant') : null;
+        $tenantId = $request->tenant_id ?? ($tenant ? $tenant->id : null);
+
+        $result = $this->requestOtpAction->execute(
+            $request->input('email'),
+            $tenantId
+        );
+
+        return response()->json($result);
+    }
+
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string'
+        ]);
+
+        $tenant = app()->bound('tenant') ? app('tenant') : null;
+        $tenantId = $request->tenant_id ?? ($tenant ? $tenant->id : null);
+
+        $result = $this->verifyOtpAction->execute(
+            $request->input('email'),
+            $request->input('otp'),
+            $tenantId
+        );
+
+        return response()->json($result);
     }
 }

@@ -2,103 +2,133 @@
 
 namespace App\Domains\Access\Services;
 
-use App\Domains\Access\Repositories\PolicyRepository;
 use App\Domains\Identity\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class AccessEvaluationService
 {
-    protected $policyRepository;
+    protected $roleService;
+    protected $permissionService;
+    protected $cacheTtl;
 
-    public function __construct(PolicyRepository $policyRepository)
+    public function __construct(RoleService $roleService, PermissionService $permissionService)
     {
-        $this->policyRepository = $policyRepository;
+        $this->roleService = $roleService;
+        $this->permissionService = $permissionService;
+        $this->cacheTtl = config('auth.access.cache_ttl', 3600); // 1 hour default
     }
 
-    public function evaluateAccess(User $user, $resource, $action, $context = [])
+    /**
+     * Check if a user has a specific permission
+     *
+     * @param User $user
+     * @param string $permission
+     * @param mixed $resourceContext
+     * @return bool
+     */
+    public function can(User $user, string $permission, $resourceContext = null): bool
     {
-        $tenantId = $user->tenant_id;
-        
-        $permissions = $user->roles()
-            ->with('permissions')
-            ->get()
-            ->pluck('permissions')
-            ->flatten()
-            ->unique('id');
-        
-        $permissionName = $resource . '.' . $action;
-        $hasPermission = $permissions->contains('name', $permissionName);
-        
-        if (!$hasPermission) {
-            return [
-                'decision' => 'deny',
-                'reason' => 'No permission found for ' . $permissionName
-            ];
-        }
-        
-        $policies = $this->policyRepository->findEnabledByTenant($tenantId, 100);
-        
-        foreach ($policies as $policy) {
-            $target = json_decode($policy->target_json, true);
-            $rules = json_decode($policy->rules_json, true);
-            
-            if ($this->matchesTarget($target, $resource, $action)) {
-                $result = $this->evaluateRules($rules, $user, $context);
-                
-                if ($result === false) {
-                    return [
-                        'decision' => 'deny',
-                        'policy_id' => $policy->id,
-                        'reason' => 'Policy ' . $policy->name . ' denied access'
-                    ];
-                }
-            }
-        }
-        
-        return [
-            'decision' => 'allow',
-            'reason' => 'Permission granted and no policies deny access'
-        ];
-    }
-
-    protected function matchesTarget($target, $resource, $action)
-    {
-        if (!isset($target['resource']) || !isset($target['action'])) {
-            return false;
-        }
-        
-        return $target['resource'] === $resource && $target['action'] === $action;
-    }
-
-    protected function evaluateRules($rules, User $user, $context)
-    {
-        if (!isset($rules['conditions']) || !is_array($rules['conditions'])) {
+        // Check if user is super admin (global)
+        if ($user->hasRole('Super Admin')) {
             return true;
         }
+
+        // Get user permissions from cache
+        $userPermissions = $this->getCachedUserPermissions($user->id);
         
-        foreach ($rules['conditions'] as $condition) {
-            if (!$this->evaluateCondition($condition, $user, $context)) {
-                return false;
-            }
+        // If not in cache, calculate and cache
+        if ($userPermissions === null) {
+            $userPermissions = $this->calculateUserPermissions($user);
+            $this->cacheUserPermissions($user->id, $userPermissions);
         }
-        
-        return true;
+
+        // Check if user has the permission
+        if (in_array($permission, $userPermissions)) {
+            return true;
+        }
+
+        // Apply policies if resource context is provided
+        if ($resourceContext !== null) {
+            return $this->applyPolicies($user, $permission, $resourceContext);
+        }
+
+        return false;
     }
 
-    protected function evaluateCondition($condition, User $user, $context)
+    /**
+     * Get cached user permissions
+     *
+     * @param string $userId
+     * @return array|null
+     */
+    protected function getCachedUserPermissions(string $userId): ?array
     {
-        foreach ($condition as $key => $value) {
-            if (str_starts_with($key, 'user.')) {
-                $attribute = str_replace('user.', '', $key);
-                
-                if ($attribute === 'role') {
-                    $hasRole = $user->roles->contains('name', $value);
-                    if (!$hasRole) {
-                        return false;
-                    }
-                }
+        $cacheKey = "user_perms:{$userId}";
+        $permissions = Cache::get($cacheKey);
+        
+        return $permissions !== null ? $permissions : null;
+    }
+
+    /**
+     * Cache user permissions
+     *
+     * @param string $userId
+     * @param array $permissions
+     * @return void
+     */
+    protected function cacheUserPermissions(string $userId, array $permissions): void
+    {
+        $cacheKey = "user_perms:{$userId}";
+        Cache::put($cacheKey, $permissions, $this->cacheTtl);
+    }
+
+    /**
+     * Calculate user permissions from roles
+     *
+     * @param User $user
+     * @return array
+     */
+    protected function calculateUserPermissions(User $user): array
+    {
+        $permissions = [];
+        
+        // Load user roles with permissions
+        $user->load('roles.permissions');
+        
+        foreach ($user->roles as $role) {
+            foreach ($role->permissions as $permission) {
+                $permissions[] = $permission->name;
             }
         }
         
-        return true;
+        // Remove duplicates
+        return array_unique($permissions);
+    }
+
+    /**
+     * Apply policies for resource-level access control
+     *
+     * @param User $user
+     * @param string $permission
+     * @param mixed $resourceContext
+     * @return bool
+     */
+    protected function applyPolicies(User $user, string $permission, $resourceContext): bool
+    {
+        // In a real implementation, this would check policies stored in the database
+        // For now, we'll return false as a placeholder
+        return false;
+    }
+
+    /**
+     * Invalidate user permissions cache
+     *
+     * @param string $userId
+     * @return void
+     */
+    public function invalidateUserCache(string $userId): void
+    {
+        $cacheKey = "user_perms:{$userId}";
+        Cache::forget($cacheKey);
     }
 }

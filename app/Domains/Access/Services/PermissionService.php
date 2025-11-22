@@ -2,46 +2,46 @@
 
 namespace App\Domains\Access\Services;
 
-use App\Domains\Access\Repositories\PermissionRepository;
-use Illuminate\Support\Str;
+use App\Domains\Access\Contracts\PermissionRepositoryInterface;
 
 class PermissionService
 {
     protected $permissionRepository;
 
-    public function __construct(PermissionRepository $permissionRepository)
+    public function __construct(PermissionRepositoryInterface $permissionRepository)
     {
         $this->permissionRepository = $permissionRepository;
     }
 
-    public function createPermission($data)
+    /**
+     * Create a permission for a specific tenant
+     *
+     * @param string $tenantId
+     * @param string $name
+     * @param string $description
+     * @return mixed
+     */
+    public function createForTenant(string $tenantId, string $name, string $description)
     {
-        $data['id'] = Str::uuid()->toString();
-        
-        if (!isset($data['name']) && isset($data['resource']) && isset($data['action'])) {
-            $data['name'] = $data['resource'] . '.' . $data['action'];
-        }
-        
-        return $this->permissionRepository->create($data);
+        return $this->permissionRepository->create([
+            'tenant_id' => $tenantId,
+            'name' => $name,
+            'description' => $description
+        ]);
     }
 
-    public function updatePermission($id, $data)
+    /**
+     * Create a global permission (not tenant-specific)
+     *
+     * @param string $name
+     * @param string $description
+     * @return mixed
+     */
+    public function createGlobal(string $name, string $description)
     {
-        return $this->permissionRepository->update($id, $data);
-    }
-
-    public function deletePermission($id)
-    {
-        return $this->permissionRepository->delete($id);
-    }
-
-    public function getPermissionById($id)
-    {
-        return $this->permissionRepository->findById($id);
-    }
-
-    public function getAllPermissions($limit = 20)
-    {
-        return $this->permissionRepository->findAll($limit);
+        return $this->permissionRepository->create([
+            'name' => $name,
+            'description' => $description
+        ]);
     }
 }

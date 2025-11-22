@@ -2,15 +2,15 @@
 
 namespace App\Domains\Identity\Services;
 
+use App\Domains\Identity\Contracts\UserRepositoryInterface;
 use App\Domains\Identity\Models\User;
-use App\Domains\Identity\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticationService
 {
     protected $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->userRepository = $userRepository;
     }

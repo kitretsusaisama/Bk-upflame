@@ -92,9 +92,9 @@ Route::middleware('guest')->group(function () {
 */
 Route::get('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::middleware('auth')->prefix('sso')->name('sso.')->group(function () {
-    Route::get('/token', [SsoController::class, 'token'])->name('token');
-    Route::post('/revoke', [SsoController::class, 'revoke'])->name('revoke');
+Route::prefix('sso/{provider}')->group(function () {
+    Route::get('/redirect', [SsoController::class, 'redirect'])->name('sso.redirect');
+    Route::get('/callback', [SsoController::class, 'callback'])->name('sso.callback');
 });
 
 

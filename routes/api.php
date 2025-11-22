@@ -21,18 +21,18 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
         Route::post('register', [AuthController::class, 'register']);
+        Route::post('request-otp', [AuthController::class, 'requestOtp']);
+        Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
         
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
-            Route::post('mfa/setup', [AuthController::class, 'setupMfa']);
-            Route::post('mfa/verify', [AuthController::class, 'verifyMfa']);
-            Route::post('token', [AuthController::class, 'refreshToken']);
         });
     });
 
-    Route::middleware('auth:sanctum')->prefix('sso')->group(function () {
-        Route::post('exchange', [SsoController::class, 'exchange']);
+    Route::prefix('sso/{provider}')->group(function () {
+        Route::get('redirect', [SsoController::class, 'redirect']);
+        Route::get('callback', [SsoController::class, 'callback']);
     });
 
     Route::middleware(['auth:sanctum', 'tenant.resolution', 'tenant.scope'])->group(function () {

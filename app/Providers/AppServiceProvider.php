@@ -11,7 +11,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register the domain service provider
+        $this->app->register(DomainServiceProvider::class);
     }
 
     /**
@@ -19,7 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Route::aliasMiddleware('tenant.resolution', \App\Http\Middleware\TenantResolution::class);
-        \Illuminate\Support\Facades\Route::aliasMiddleware('tenant.scope', \App\Http\Middleware\TenantScope::class);
+        //
     }
 }
