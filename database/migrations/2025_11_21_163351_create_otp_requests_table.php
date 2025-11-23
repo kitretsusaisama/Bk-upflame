@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('otp_requests', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->char('tenant_id', 36)->nullable();
             $table->string('recipient');          // normalized email or phone
             $table->string('otp_hash');           // hashed OTP

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Role;
 
 use App\Http\Controllers\Controller;
-use App\Domain\Authorization\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Http\Resources\RoleResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,7 +44,7 @@ class RoleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Domain\Authorization\Models\Role  $role
+     * @param  \App\Domains\Access\Models\Role  $role
      * @return \App\Http\Resources\RoleResource
      */
     public function show(Role $role)
@@ -56,7 +56,7 @@ class RoleController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Domain\Authorization\Models\Role  $role
+     * @param  \App\Domains\Access\Models\Role  $role
      * @return \App\Http\Resources\RoleResource
      */
     public function update(Request $request, Role $role)
@@ -75,7 +75,7 @@ class RoleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Domain\Authorization\Models\Role  $role
+     * @param  \App\Domains\Access\Models\Role  $role
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Role $role)

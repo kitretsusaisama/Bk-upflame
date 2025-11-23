@@ -4,7 +4,7 @@ namespace Tests\Feature\Role;
 
 use Tests\TestCase;
 use App\Domain\Tenant\Models\Tenant;
-use App\Domain\Authorization\Models\Role;
+use App\Domains\Access\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RoleManagementTest extends TestCase

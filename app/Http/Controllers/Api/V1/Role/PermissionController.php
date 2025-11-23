@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Role;
 
 use App\Http\Controllers\Controller;
-use App\Domain\Authorization\Models\Permission;
+use App\Domains\Access\Models\Permission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -51,7 +51,7 @@ class PermissionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Domain\Authorization\Models\Permission  $permission
+     * @param  \App\Domains\Access\Models\Permission  $permission
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Permission $permission): JsonResponse
@@ -65,7 +65,7 @@ class PermissionController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Domain\Authorization\Models\Permission  $permission
+     * @param  \App\Domains\Access\Models\Permission  $permission
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Permission $permission): JsonResponse
@@ -90,7 +90,7 @@ class PermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Domain\Authorization\Models\Permission  $permission
+     * @param  \App\Domains\Access\Models\Permission  $permission
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Permission $permission): JsonResponse

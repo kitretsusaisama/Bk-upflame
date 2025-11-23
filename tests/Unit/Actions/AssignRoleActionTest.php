@@ -4,7 +4,7 @@ namespace Tests\Unit\Actions;
 
 use Tests\TestCase;
 use App\Domain\Authorization\Actions\AssignRoleAction;
-use App\Domain\Authorization\Models\Role;
+use App\Domains\Access\Models\Role;
 use App\Domain\Identity\Models\User;
 use App\Domain\Tenant\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;

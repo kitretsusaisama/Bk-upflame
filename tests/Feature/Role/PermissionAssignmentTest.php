@@ -4,8 +4,8 @@ namespace Tests\Feature\Role;
 
 use Tests\TestCase;
 use App\Domain\Tenant\Models\Tenant;
-use App\Domain\Authorization\Models\Role;
-use App\Domain\Authorization\Models\Permission;
+use App\Domains\Access\Models\Role;
+use App\Domains\Access\Models\Permission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PermissionAssignmentTest extends TestCase
