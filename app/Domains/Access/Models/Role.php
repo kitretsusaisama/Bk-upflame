@@ -2,49 +2,80 @@
 
 namespace App\Domains\Access\Models;
 
-use App\Support\BaseModel;
-use App\Domains\Identity\Models\Tenant;
+use App\Support\Domain\Shared\Traits\TenantScoped;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class Role extends BaseModel
+class Role extends Model
 {
+    use HasUuids, TenantScoped;
 
+    /**
+     * The UUID column name.
+     *
+     * @var string
+     */
+    protected $uuidColumn = 'id';
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'roles';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'tenant_id',
         'name',
         'description',
-        'role_family',
-        'is_system'
+        'is_system',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
     protected $casts = [
         'is_system' => 'boolean',
     ];
 
+    /**
+     * Get the tenant that owns the role.
+     */
     public function tenant()
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(\App\Domains\Tenant\Models\Tenant::class);
     }
 
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class, 'role_permissions')->withTimestamps();
-    }
-
+    /**
+     * Get the users with this role.
+     */
     public function users()
     {
         return $this->belongsToMany(
             \App\Domains\Identity\Models\User::class,
-            'user_roles'
+            'user_roles',
+            'role_id',
+            'user_id'
         )->withTimestamps();
     }
 
-    public function hasPermission(string $permission): bool
+    /**
+     * Get the permissions assigned to this role.
+     */
+    public function permissions()
     {
-        return $this->permissions->contains('name', $permission);
-    }
-
-    protected static function newFactory()
-    {
-        return \Database\Factories\RoleFactory::new();
+        return $this->belongsToMany(
+            Permission::class,
+            'role_permissions',
+            'role_id',
+            'permission_id'
+        )->withTimestamps();
     }
 }

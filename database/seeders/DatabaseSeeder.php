@@ -14,7 +14,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Run the production seeder
-        $this->call(ProductionSeeder::class);
+        // Run seeders in correct order
+        $this->call(TenantSeeder::class);
+        $this->call(PermissionSeeder::class);
+        $this->call(RoleSeeder::class);
+        $this->call(RolePermissionSeeder::class);
+        $this->call(UserSeeder::class);
+        $this->call(ProviderSeeder::class);
+        $this->call(WorkflowSeeder::class);
+        
+        // Run the production seeder (optional - for development)
+        // $this->call(ProductionSeeder::class);
     }
 }
