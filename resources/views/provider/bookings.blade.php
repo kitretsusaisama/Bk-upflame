@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'My Bookings')
+@section('title', 'Provider Bookings')
 
 @section('content')
 <div class="container-fluid">
@@ -18,33 +18,32 @@
                                     <th>Booking ID</th>
                                     <th>Customer</th>
                                     <th>Service</th>
-                                    <th>Date</th>
+                                    <th>Date & Time</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>#BK001</td>
-                                    <td>John Doe</td>
-                                    <td>Plumbing</td>
-                                    <td>2025-12-01</td>
-                                    <td><span class="badge badge-warning">Pending</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-success">Accept</button>
-                                        <button class="btn btn-sm btn-danger">Reject</button>
-                                        <button class="btn btn-sm btn-info">View</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#BK002</td>
-                                    <td>Jane Doe</td>
-                                    <td>Electrical</td>
-                                    <td>2025-12-02</td>
+                                    <td>#BK-101</td>
+                                    <td>John Customer</td>
+                                    <td>Cardiology Checkup</td>
+                                    <td>Dec 15, 2023 10:00 AM</td>
                                     <td><span class="badge badge-success">Confirmed</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Reschedule</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#BK-102</td>
+                                    <td>Jane Doe</td>
+                                    <td>Dermatology Consultation</td>
+                                    <td>Dec 16, 2023 2:30 PM</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info">View</button>
+                                        <button class="btn btn-sm btn-success">Confirm</button>
                                     </td>
                                 </tr>
                             </tbody>

@@ -3,30 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Domains\Booking\Repositories\BookingRepository;
+use App\Domains\Menu\Services\MenuService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CustomerDashboardController extends Controller
 {
     protected $bookingRepository;
+    protected $menuService;
 
-    public function __construct(BookingRepository $bookingRepository)
+    public function __construct(BookingRepository $bookingRepository, MenuService $menuService)
     {
         $this->bookingRepository = $bookingRepository;
+        $this->menuService = $menuService;
     }
 
     public function dashboard()
     {
         $userId = auth()->id();
 
-        $menuItems = [
-            ['label' => 'Dashboard', 'route' => 'customer.dashboard', 'icon' => '🏠'],
-            ['label' => 'My Bookings', 'route' => 'customer.bookings', 'icon' => '📅'],
-            ['label' => 'Browse Services', 'route' => 'customer.services', 'icon' => '🔍'],
-            ['separator' => true, 'label' => 'Account'],
-            ['label' => 'Profile', 'route' => 'customer.profile', 'icon' => '👤'],
-            ['label' => 'Payment Methods', 'route' => 'customer.payments', 'icon' => '💳'],
-            ['label' => 'Support', 'route' => 'customer.support', 'icon' => '💬'],
-        ];
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
 
         $stats = [
             'total_bookings' => $this->bookingRepository->totalForUser($userId),
@@ -37,6 +44,96 @@ class CustomerDashboardController extends Controller
 
         $upcomingBookings = $this->bookingRepository->upcomingForUser($userId);
 
-        return view('customer.dashboard', compact('menuItems', 'stats', 'upcomingBookings'));
+        return Inertia::render('Customer/Dashboard', compact('menuItems', 'stats', 'upcomingBookings', 'userRole'));
+    }
+
+    public function bookings()
+    {
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
+        
+        return Inertia::render('Customer/Bookings', compact('menuItems', 'userRole'));
+    }
+
+    public function services()
+    {
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
+        
+        return Inertia::render('Customer/Services', compact('menuItems', 'userRole'));
+    }
+
+    public function profile()
+    {
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
+        
+        return Inertia::render('Customer/Profile', compact('menuItems', 'userRole'));
+    }
+
+    public function payments()
+    {
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
+        
+        return Inertia::render('Customer/Payments', compact('menuItems', 'userRole'));
+    }
+
+    public function support()
+    {
+        // Safely get tenant ID from the tenant binding or authenticated user
+        $tenantId = null;
+        try {
+            $tenant = app('tenant');
+            $tenantId = $tenant ? $tenant->id : (auth()->user()->tenant_id ?? null);
+        } catch (\Exception $e) {
+            // Tenant binding doesn't exist, try to get from user
+            $tenantId = auth()->user()->tenant_id ?? null;
+        }
+
+        $menuItems = $this->menuService->getSidebarForCurrentUser();
+        $userRole = 'Customer';
+        
+        return Inertia::render('Customer/Support', compact('menuItems', 'userRole'));
     }
 }

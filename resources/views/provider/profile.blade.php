@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'My Profile')
+@section('title', 'Provider Profile')
 
 @section('content')
 <div class="container-fluid">
@@ -15,52 +15,44 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name">Full Name</label>
-                                    <input type="text" class="form-control" id="name" value="John Smith">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email">Email Address</label>
-                                    <input type="email" class="form-control" id="email" value="john.smith@example.com">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="phone">Phone Number</label>
-                                    <input type="text" class="form-control" id="phone" value="+1 (555) 123-4567">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" class="form-control" id="fullName" value="Dr. John Smith">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="specialty">Specialty</label>
-                                    <select class="form-control" id="specialty">
-                                        <option>Plumbing</option>
-                                        <option selected>Electrical</option>
-                                        <option>Carpentry</option>
-                                        <option>Painting</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="specialty" value="Cardiology">
                                 </div>
                             </div>
                         </div>
-                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" value="john.smith@example.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone">Phone</label>
+                                    <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="bio">Bio</label>
-                                    <textarea class="form-control" id="bio" rows="4">Experienced electrical contractor with over 10 years of experience in residential and commercial electrical work.</textarea>
+                                    <textarea class="form-control" id="bio" rows="4">Board-certified cardiologist with over 10 years of experience in heart health and preventive care.</textarea>
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="license">License Number</label>
-                                    <input type="text" class="form-control" id="license" value="ELC-12345">
+                                    <input type="text" class="form-control" id="license" value="CARD-12345">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -70,8 +62,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>
             </div>

@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'Roles')
+@section('title', 'Roles & Permissions')
 
 @section('content')
 <div class="container-fluid">
@@ -8,7 +8,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Roles</h4>
+                    <h4 class="card-title">Roles & Permissions</h4>
                     <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addRoleModal">
                         <i class="fas fa-plus"></i> Add Role
                     </button>
@@ -21,14 +21,16 @@
                                     <th>Role Name</th>
                                     <th>Description</th>
                                     <th>Permissions</th>
+                                    <th>Users</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Administrator</td>
-                                    <td>Full access to all features</td>
-                                    <td>Full Access</td>
+                                    <td>Tenant Admin</td>
+                                    <td>Full access to tenant management</td>
+                                    <td>24 permissions</td>
+                                    <td>2 users</td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>
@@ -38,7 +40,8 @@
                                 <tr>
                                     <td>Provider</td>
                                     <td>Access to provider dashboard</td>
-                                    <td>Limited Access</td>
+                                    <td>8 permissions</td>
+                                    <td>5 users</td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>

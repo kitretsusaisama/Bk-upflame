@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'System Logs')
+@section('title', 'Ops Audit Logs')
 
 @section('content')
 <div class="container-fluid">
@@ -8,31 +8,40 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">System Logs</h4>
-                    <div class="float-right">
-                        <button class="btn btn-secondary btn-sm mr-2">Export Logs</button>
-                        <button class="btn btn-danger btn-sm">Clear Logs</button>
+                    <h4 class="card-title">Audit Logs</h4>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-outline-primary">Export Logs</button>
+                        <button class="btn btn-sm btn-outline-secondary">Clear Filters</button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
+                    <div class="row mb-4">
                         <div class="col-md-3">
-                            <select class="form-control">
-                                <option>All Levels</option>
-                                <option>Error</option>
-                                <option>Warning</option>
-                                <option>Info</option>
-                                <option>Debug</option>
+                            <label for="dateFilter">Date Range</label>
+                            <input type="date" class="form-control" id="dateFilter">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="userFilter">User</label>
+                            <select class="form-control" id="userFilter">
+                                <option>All Users</option>
+                                <option>John Admin</option>
+                                <option>Jane Ops</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <input type="date" class="form-control" placeholder="Start Date">
+                            <label for="actionFilter">Action Type</label>
+                            <select class="form-control" id="actionFilter">
+                                <option>All Actions</option>
+                                <option>Create</option>
+                                <option>Update</option>
+                                <option>Delete</option>
+                                <option>Approve</option>
+                                <option>Reject</option>
+                            </select>
                         </div>
                         <div class="col-md-3">
-                            <input type="date" class="form-control" placeholder="End Date">
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-primary btn-block">Filter</button>
+                            <label for="searchFilter">Search</label>
+                            <input type="text" class="form-control" id="searchFilter" placeholder="Search logs...">
                         </div>
                     </div>
                     
@@ -41,35 +50,37 @@
                             <thead>
                                 <tr>
                                     <th>Timestamp</th>
-                                    <th>Level</th>
-                                    <th>Message</th>
-                                    <th>Source</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Resource</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>2025-11-22 14:30:25</td>
-                                    <td><span class="badge badge-danger">ERROR</span></td>
-                                    <td>Database connection failed for tenant admin providers view</td>
-                                    <td>ViewServiceProvider</td>
+                                    <td>2023-12-15 14:30:22</td>
+                                    <td>John Admin</td>
+                                    <td><span class="badge badge-success">Approve</span></td>
+                                    <td>Workflow WF-2023-001</td>
+                                    <td>Provider onboarding approved</td>
+                                    <td>192.168.1.100</td>
                                 </tr>
                                 <tr>
-                                    <td>2025-11-22 14:25:18</td>
-                                    <td><span class="badge badge-warning">WARNING</span></td>
-                                    <td>Slow query detected in bookings table</td>
-                                    <td>QueryMonitor</td>
+                                    <td>2023-12-15 14:25:18</td>
+                                    <td>Jane Ops</td>
+                                    <td><span class="badge badge-info">Update</span></td>
+                                    <td>Booking BK-2023-045</td>
+                                    <td>Rescheduled appointment</td>
+                                    <td>192.168.1.101</td>
                                 </tr>
                                 <tr>
-                                    <td>2025-11-22 14:20:42</td>
-                                    <td><span class="badge badge-info">INFO</span></td>
-                                    <td>User John Doe logged in successfully</td>
-                                    <td>AuthController</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-11-22 14:15:33</td>
-                                    <td><span class="badge badge-success">DEBUG</span></td>
-                                    <td>Cache hit for user permissions</td>
-                                    <td>PermissionService</td>
+                                    <td>2023-12-15 14:15:44</td>
+                                    <td>System</td>
+                                    <td><span class="badge badge-warning">Create</span></td>
+                                    <td>Workflow WF-2023-042</td>
+                                    <td>New provider onboarding started</td>
+                                    <td>192.168.1.1</td>
                                 </tr>
                             </tbody>
                         </table>

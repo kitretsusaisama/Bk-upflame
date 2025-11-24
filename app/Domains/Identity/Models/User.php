@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -14,6 +15,7 @@ class User extends Authenticatable
     use Notifiable;
     use HasUuids;
     use HasFactory;
+    use Authorizable;
 
     protected $fillable = [
         'tenant_id',
@@ -100,6 +102,11 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         foreach ($this->roles as $role) {
+            // Ensure permissions are loaded
+            if (!$role->relationLoaded('permissions')) {
+                $role->load('permissions');
+            }
+            
             if ($role->permissions->contains('name', $permission)) {
                 return true;
             }
@@ -122,5 +129,17 @@ class User extends Authenticatable
         
         // Check if user has the role by name
         return $this->roles->contains('name', $roleName);
+    }
+    
+    /**
+     * Determine if the user has a given ability.
+     *
+     * @param  string  $ability
+     * @param  array|mixed  $arguments
+     * @return bool
+     */
+    public function can($ability, $arguments = []): bool
+    {
+        return $this->hasPermission($ability);
     }
 }

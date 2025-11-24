@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'Approvals')
+@section('title', 'Ops Approvals')
 
 @section('content')
 <div class="container-fluid">
@@ -18,34 +18,34 @@
                                     <th>Request ID</th>
                                     <th>Type</th>
                                     <th>Requested By</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
+                                    <th>Description</th>
+                                    <th>Submitted</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>#REQ001</td>
-                                    <td>Provider Registration</td>
-                                    <td>John Smith</td>
-                                    <td>2025-11-20</td>
-                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>REQ-2023-001</td>
+                                    <td>Provider Onboarding</td>
+                                    <td>Dr. John Smith</td>
+                                    <td>Medical license verification</td>
+                                    <td>3 hours ago</td>
                                     <td>
                                         <button class="btn btn-sm btn-success">Approve</button>
                                         <button class="btn btn-sm btn-danger">Reject</button>
-                                        <button class="btn btn-sm btn-info">View</button>
+                                        <button class="btn btn-sm btn-info">View Details</button>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>#REQ002</td>
-                                    <td>Service Request</td>
+                                    <td>REQ-2023-002</td>
+                                    <td>Booking Modification</td>
                                     <td>Jane Doe</td>
-                                    <td>2025-11-21</td>
-                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>Reschedule cardiology appointment</td>
+                                    <td>1 day ago</td>
                                     <td>
                                         <button class="btn btn-sm btn-success">Approve</button>
                                         <button class="btn btn-sm btn-danger">Reject</button>
-                                        <button class="btn btn-sm btn-info">View</button>
+                                        <button class="btn btn-sm btn-info">View Details</button>
                                     </td>
                                 </tr>
                             </tbody>

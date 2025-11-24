@@ -13,6 +13,11 @@ abstract class BaseRepository
         $this->model = $model;
     }
 
+    public function getModel()
+    {
+        return $this->model;
+    }
+
     public function findById(string $id)
     {
         return $this->model->find($id);

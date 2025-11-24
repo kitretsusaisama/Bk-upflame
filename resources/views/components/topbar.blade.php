@@ -1,4 +1,4 @@
-    <header class="topbar">
+<header class="topbar">
     <div class="topbar-left">
         <button class="mobile-menu-toggle" id="mobileMenuToggle">
             <span>☰</span>
@@ -53,7 +53,7 @@
                 <span class="dropdown-arrow">▼</span>
             </button>
             <div class="user-dropdown">
-                <a href="#" class="dropdown-item">
+                <a href="{{ route('superadmin.profile') }}" class="dropdown-item">
                     <span class="dropdown-icon">👤</span>
                     <span>Profile</span>
                 </a>

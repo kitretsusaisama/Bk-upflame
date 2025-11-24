@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\UserManagementService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +12,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(UserManagementService::class, function ($app) {
+            return new UserManagementService(
+                $app->make(\App\Domains\Identity\Repositories\UserRepository::class),
+                $app->make(\App\Domains\Identity\Repositories\TenantRepository::class),
+                $app->make(\App\Domains\Access\Repositories\RoleRepository::class)
+            );
+        });
     }
 
     /**

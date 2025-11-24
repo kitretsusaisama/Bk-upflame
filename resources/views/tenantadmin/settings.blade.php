@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Settings')
 
@@ -12,64 +12,34 @@
                 </div>
                 <div class="card-body">
                     <form>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tenantName">Tenant Name</label>
-                                    <input type="text" class="form-control" id="tenantName" value="Default Tenant">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tenantDomain">Domain</label>
-                                    <input type="text" class="form-control" id="tenantDomain" value="default.example.com">
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="tenantName">Tenant Name</label>
+                            <input type="text" class="form-control" id="tenantName" value="Acme Corporation">
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="timezone">Timezone</label>
-                                    <select class="form-control" id="timezone">
-                                        <option>UTC</option>
-                                        <option>EST</option>
-                                        <option>PST</option>
-                                        <option>CST</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="locale">Locale</label>
-                                    <select class="form-control" id="locale">
-                                        <option>en-US</option>
-                                        <option>en-GB</option>
-                                        <option>fr-FR</option>
-                                        <option>es-ES</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="tenantDomain">Primary Domain</label>
+                            <input type="text" class="form-control" id="tenantDomain" value="acme.example.com">
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="description">Description</label>
-                                    <textarea class="form-control" id="description" rows="3">Default tenant description</textarea>
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Contact Email</label>
+                            <input type="email" class="form-control" id="contactEmail" value="admin@acme.example.com">
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="logo">Logo</label>
-                                    <input type="file" class="form-control-file" id="logo">
-                                </div>
-                            </div>
+                        <div class="form-group">
+                            <label for="timezone">Timezone</label>
+                            <select class="form-control" id="timezone">
+                                <option>UTC</option>
+                                <option>America/New_York</option>
+                                <option>America/Los_Angeles</option>
+                            </select>
                         </div>
-                        
+                        <div class="form-group">
+                            <label for="language">Language</label>
+                            <select class="form-control" id="language">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Save Settings</button>
                     </form>
                 </div>

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(ProviderSeeder::class);
         $this->call(WorkflowSeeder::class);
+        $this->call(MenuSeeder::class);
         
         // Run the production seeder (optional - for development)
         // $this->call(ProductionSeeder::class);

@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'My Services')
+@section('title', 'Provider Services')
 
 @section('content')
 <div class="container-fluid">
@@ -28,25 +28,27 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Plumbing Repair</td>
-                                    <td>Basic plumbing repair services</td>
-                                    <td>$75/hour</td>
-                                    <td>1 hour</td>
+                                    <td>Cardiology Checkup</td>
+                                    <td>Comprehensive heart health assessment</td>
+                                    <td>$150.00</td>
+                                    <td>30 mins</td>
                                     <td><span class="badge badge-success">Active</span></td>
                                     <td>
+                                        <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Disable</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Emergency Plumbing</td>
-                                    <td>24/7 emergency plumbing services</td>
-                                    <td>$150/hour</td>
-                                    <td>1 hour</td>
+                                    <td>Dermatology Consultation</td>
+                                    <td>Skin health evaluation and treatment</td>
+                                    <td>$120.00</td>
+                                    <td>45 mins</td>
                                     <td><span class="badge badge-success">Active</span></td>
                                     <td>
+                                        <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Disable</button>
+                                        <button class="btn btn-sm btn-danger">Delete</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -63,7 +65,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Service</h5>
+                <h5 class="modal-title">Add New Service</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
@@ -79,11 +81,11 @@
                         <textarea class="form-control" id="description" rows="3"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="price">Price</label>
-                        <input type="number" class="form-control" id="price" required>
+                        <label for="price">Price ($)</label>
+                        <input type="number" class="form-control" id="price" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label for="duration">Duration (hours)</label>
+                        <label for="duration">Duration (minutes)</label>
                         <input type="number" class="form-control" id="duration" required>
                     </div>
                 </form>

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Providers')
 
@@ -27,9 +27,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>John Doe</td>
-                                    <td>john@example.com</td>
-                                    <td>Plumbing</td>
+                                    <td>Dr. John Smith</td>
+                                    <td>john.smith@example.com</td>
+                                    <td>Cardiology</td>
                                     <td><span class="badge badge-success">Active</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
@@ -38,10 +38,10 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Jane Smith</td>
-                                    <td>jane@example.com</td>
-                                    <td>Electrical</td>
-                                    <td><span class="badge badge-success">Active</span></td>
+                                    <td>Dr. Jane Doe</td>
+                                    <td>jane.doe@example.com</td>
+                                    <td>Dermatology</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>
@@ -80,10 +80,9 @@
                     <div class="form-group">
                         <label for="specialty">Specialty</label>
                         <select class="form-control" id="specialty">
-                            <option>Plumbing</option>
-                            <option>Electrical</option>
-                            <option>Carpentry</option>
-                            <option>Painting</option>
+                            <option>Cardiology</option>
+                            <option>Dermatology</option>
+                            <option>Neurology</option>
                         </select>
                     </div>
                 </form>

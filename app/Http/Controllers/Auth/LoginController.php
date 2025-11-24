@@ -8,7 +8,6 @@ use App\Support\Concerns\DeterminesDashboardRoute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -113,6 +112,13 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        Log::info('Logout attempt', [
+            'user_id' => $request->user() ? $request->user()->id : 'no user',
+            'method' => $request->method(),
+            'uri' => $request->getRequestUri(),
+            'session_id' => $request->session()->getId(),
+        ]);
+
         $user = $request->user();
 
         if ($user) {
@@ -126,6 +132,10 @@ class LoginController extends Controller
         $request->session()->forget('sso_token');
 
         cookie()->queue(cookie()->forget('sso_token'));
+
+        Log::info('Logout successful', [
+            'user_id' => $user ? $user->id : 'no user',
+        ]);
 
         return redirect()->route('login');
     }

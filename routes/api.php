@@ -16,6 +16,8 @@ use App\Domains\Provider\Http\Controllers\ProviderDocumentController;
 use App\Domains\Booking\Http\Controllers\BookingController;
 use App\Domains\Booking\Http\Controllers\ServiceController;
 use App\Domains\Notification\Http\Controllers\NotificationController;
+use App\Http\Controllers\Api\V1\Menu\MenuController;
+use App\Http\Controllers\Api\V1\SuperAdmin\UserController as SuperAdminUserController;
 
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
@@ -141,5 +143,31 @@ Route::prefix('v1')->group(function () {
             Route::put('/preferences', [NotificationController::class, 'updatePreferences']);
             Route::get('/', [NotificationController::class, 'index']);
         });
+        
+        Route::prefix('menus')->group(function () {
+            Route::get('/', [MenuController::class, 'index']);
+            Route::get('/all', [MenuController::class, 'all']);
+            Route::post('/', [MenuController::class, 'store']);
+            Route::get('/{menu}', [MenuController::class, 'show']);
+            Route::put('/{menu}', [MenuController::class, 'update']);
+            Route::delete('/{menu}', [MenuController::class, 'destroy']);
+            Route::post('/clear-cache', [MenuController::class, 'clearCache']);
+        });
+    });
+    
+    // Super Admin routes (no tenant scope)
+    Route::middleware(['auth:sanctum', 'role:Super Admin'])->prefix('superadmin')->group(function () {
+        Route::prefix('users')->group(function () {
+            Route::get('/', [SuperAdminUserController::class, 'index']);
+            Route::post('/', [SuperAdminUserController::class, 'store']);
+            Route::get('/{id}', [SuperAdminUserController::class, 'show']);
+            Route::put('/{id}', [SuperAdminUserController::class, 'update']);
+            Route::delete('/{id}', [SuperAdminUserController::class, 'destroy']);
+            Route::post('/{id}/activate', [SuperAdminUserController::class, 'activate']);
+            Route::post('/{id}/deactivate', [SuperAdminUserController::class, 'deactivate']);
+        });
+        
+        Route::get('/roles', [SuperAdminUserController::class, 'getRoles']);
+        Route::get('/tenants', [SuperAdminUserController::class, 'getTenants']);
     });
 });

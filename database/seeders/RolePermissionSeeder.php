@@ -62,7 +62,12 @@ class RolePermissionSeeder extends Seeder
                 // Tenant admin gets specific permissions
                 $relevantPermissions = $allPermissions->filter(function ($permission) {
                     return in_array($permission->resource, [
-                        'booking', 'provider', 'service', 'user', 'role', 'workflow', 'notification', 'admin', 'tenant'
+                        'booking', 'provider', 'service', 'user', 'role', 'permission', 'workflow', 'notification', 'admin', 'tenant',
+                        'dashboard', 'system', 'system-user', 'system-report', 'tenant-user', 'approval', 'profile', 'security'
+                    ]) || Str::startsWith($permission->name, [
+                        'view-tenantadmin-dashboard', 'manage-tenant', 'manage-providers', 'manage-bookings',
+                        'manage-roles', 'manage-permissions', 'manage-customer-account', 'view-customer-bookings',
+                        'update-profile', 'manage-security'
                     ]);
                 });
                 $validPermissionIds = $this->getValidPermissionIds($relevantPermissions->pluck('id')->toArray());
@@ -71,16 +76,38 @@ class RolePermissionSeeder extends Seeder
             case 'provider':
                 // Provider gets specific permissions
                 $relevantPermissions = $allPermissions->filter(function ($permission) {
-                    return in_array($permission->resource, ['booking', 'service']);
+                    return in_array($permission->resource, [
+                        'booking', 'provider-service', 'provider-booking', 'provider-schedule'
+                    ]) || Str::startsWith($permission->name, [
+                        'view-provider-dashboard', 'manage-provider-services', 'view-provider-bookings',
+                        'manage-provider-schedule'
+                    ]);
+                });
+                $validPermissionIds = $this->getValidPermissionIds($relevantPermissions->pluck('id')->toArray());
+                break;
+                
+            case 'operations':
+                // Operations gets workflow and approval permissions
+                $relevantPermissions = $allPermissions->filter(function ($permission) {
+                    return in_array($permission->resource, [
+                        'workflow', 'approval'
+                    ]) || Str::startsWith($permission->name, [
+                        'view-ops-dashboard', 'view-workflows', 'manage-workflows', 'manage-approvals'
+                    ]);
                 });
                 $validPermissionIds = $this->getValidPermissionIds($relevantPermissions->pluck('id')->toArray());
                 break;
                 
             case 'customer':
             case 'premium customer':
-                // Customer gets booking permissions
+                // Customer gets booking and service permissions
                 $relevantPermissions = $allPermissions->filter(function ($permission) {
-                    return $permission->resource === 'booking';
+                    return in_array($permission->resource, [
+                        'booking', 'service', 'customer-account', 'customer-booking'
+                    ]) || Str::startsWith($permission->name, [
+                        'view-customer-dashboard', 'manage-customer-account', 'view-customer-bookings',
+                        'browse-services'
+                    ]);
                 });
                 $validPermissionIds = $this->getValidPermissionIds($relevantPermissions->pluck('id')->toArray());
                 break;
@@ -88,7 +115,7 @@ class RolePermissionSeeder extends Seeder
             default:
                 // For other roles, assign view permissions only
                 $relevantPermissions = $allPermissions->filter(function ($permission) {
-                    return $permission->action === 'view' || $permission->action === 'list';
+                    return $permission->action === 'view' || $permission->action === 'list' || $permission->action === 'read';
                 });
                 $validPermissionIds = $this->getValidPermissionIds($relevantPermissions->pluck('id')->toArray());
                 break;

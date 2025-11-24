@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Bookings')
 
@@ -22,36 +22,36 @@
                                     <th>Customer</th>
                                     <th>Provider</th>
                                     <th>Service</th>
-                                    <th>Date</th>
+                                    <th>Date & Time</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>#BK001</td>
-                                    <td>John Doe</td>
-                                    <td>Jane Smith</td>
-                                    <td>Plumbing</td>
-                                    <td>2025-12-01</td>
-                                    <td><span class="badge badge-warning">Pending</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info">View</button>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#BK002</td>
-                                    <td>Jane Doe</td>
-                                    <td>John Smith</td>
-                                    <td>Electrical</td>
-                                    <td>2025-12-02</td>
+                                    <td>#BK-001</td>
+                                    <td>John Customer</td>
+                                    <td>Dr. Jane Smith</td>
+                                    <td>Cardiology Checkup</td>
+                                    <td>Dec 15, 2023 10:00 AM</td>
                                     <td><span class="badge badge-success">Confirmed</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-info">View</button>
                                         <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Delete</button>
+                                        <button class="btn btn-sm btn-danger">Cancel</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#BK-002</td>
+                                    <td>Jane Doe</td>
+                                    <td>Dr. John Wilson</td>
+                                    <td>Dermatology Consultation</td>
+                                    <td>Dec 16, 2023 2:30 PM</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info">View</button>
+                                        <button class="btn btn-sm btn-warning">Edit</button>
+                                        <button class="btn btn-sm btn-danger">Cancel</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -78,28 +78,27 @@
                     <div class="form-group">
                         <label for="customer">Customer</label>
                         <select class="form-control" id="customer">
-                            <option>John Doe</option>
+                            <option>John Customer</option>
                             <option>Jane Doe</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="provider">Provider</label>
                         <select class="form-control" id="provider">
-                            <option>Jane Smith</option>
-                            <option>John Smith</option>
+                            <option>Dr. Jane Smith</option>
+                            <option>Dr. John Wilson</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="service">Service</label>
                         <select class="form-control" id="service">
-                            <option>Plumbing</option>
-                            <option>Electrical</option>
-                            <option>Carpentry</option>
+                            <option>Cardiology Checkup</option>
+                            <option>Dermatology Consultation</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="date">Date</label>
-                        <input type="date" class="form-control" id="date" required>
+                        <label for="datetime">Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="datetime">
                     </div>
                 </form>
             </div>

@@ -12,25 +12,45 @@
     <nav class="sidebar-nav">
         <ul class="nav-list">
             @foreach($menuItems as $item)
-                @if(isset($item['separator']))
-                    <li class="nav-separator">{{ $item['label'] }}</li>
+                @if($item->type === 'heading')
+                    <li class="nav-header">{{ $item->label }}</li>
+                @elseif($item->type === 'separator')
+                    <li class="nav-separator">{{ $item->label }}</li>
                 @else
-                    <li class="nav-item {{ request()->routeIs($item['route'] ?? '') ? 'active' : '' }}">
-                        <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" class="nav-link">
-                            <span class="nav-icon">{{ $item['icon'] ?? '●' }}</span>
-                            <span class="nav-text">{{ $item['label'] }}</span>
-                            @if(isset($item['badge']))
-                                <span class="nav-badge">{{ $item['badge'] }}</span>
+                    <li class="nav-item {{ request()->routeIs($item->route ?? '') ? 'active' : '' }}">
+                        <a href="{{ $item->route ? route($item->route) : ($item->url ?? '#') }}" class="nav-link">
+                            @if($item->icon)
+                                <span class="nav-icon">
+                                    <i class="{{ $item->icon }}"></i>
+                                </span>
+                            @else
+                                <span class="nav-icon">●</span>
+                            @endif
+                            <span class="nav-text">{{ $item->label }}</span>
+                            @if(!empty($item->metadata['badge']))
+                                <span class="nav-badge">{{ $item->metadata['badge'] }}</span>
                             @endif
                         </a>
                         
-                        @if(isset($item['children']))
+                        @if($item->children && $item->children->count() > 0)
                             <ul class="nav-submenu">
-                                @foreach($item['children'] as $child)
-                                    <li class="nav-item {{ request()->routeIs($child['route'] ?? '') ? 'active' : '' }}">
-                                        <a href="{{ isset($child['route']) ? route($child['route']) : '#' }}" class="nav-link">
-                                            <span class="nav-text">{{ $child['label'] }}</span>
+                                @foreach($item->children as $child)
+                                    <li class="nav-item {{ request()->routeIs($child->route ?? '') ? 'active' : '' }}">
+                                        <a href="{{ $child->route ? route($child->route) : ($child->url ?? '#') }}" class="nav-link">
+                                            <span class="nav-text">{{ $child->label }}</span>
                                         </a>
+                                        
+                                        @if($child->children && $child->children->count() > 0)
+                                            <ul class="nav-submenu">
+                                                @foreach($child->children as $grandchild)
+                                                    <li class="nav-item {{ request()->routeIs($grandchild->route ?? '') ? 'active' : '' }}">
+                                                        <a href="{{ $grandchild->route ? route($grandchild->route) : ($grandchild->url ?? '#') }}" class="nav-link">
+                                                            <span class="nav-text">{{ $grandchild->label }}</span>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>

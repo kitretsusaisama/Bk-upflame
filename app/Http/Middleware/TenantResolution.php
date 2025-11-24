@@ -12,10 +12,18 @@ class TenantResolution
     public function handle($request, Closure $next)
 {
     // SUPER ADMIN must bypass tenant logic but still have a tenant context
-    if (auth()->check() && auth()->user()->hasRole('Super Admin')) {
-        $fallbackTenant = Tenant::first();
-        app()->instance('tenant', $fallbackTenant);
-        return $next($request);
+    if (auth()->check()) {
+        $user = auth()->user();
+        // Ensure roles are loaded
+        if (!$user->relationLoaded('roles')) {
+            $user->load('roles');
+        }
+        
+        if ($user->hasRole('Super Admin')) {
+            $fallbackTenant = Tenant::first();
+            app()->instance('tenant', $fallbackTenant);
+            return $next($request);
+        }
     }
 
     $host = $this->normalizeHost($request->getHost());

@@ -18,6 +18,7 @@ return [
         'booking',
         'workflow',
         'notification',
+        'menu',
     ],
 
     /*
@@ -99,6 +100,13 @@ return [
             'manage_templates',
             'manage_preferences',
         ],
+        'menu' => [
+            'view',
+            'create',
+            'update',
+            'delete',
+            'manage',
+        ],
     ],
 
     /*
@@ -131,6 +139,10 @@ return [
             'max_recipients_per_batch' => env('MODULE_NOTIFICATION_MAX_RECIPIENTS', 1000),
             'retry_attempts' => env('MODULE_NOTIFICATION_RETRY_ATTEMPTS', 3),
         ],
+        'menu' => [
+            'max_levels' => env('MODULE_MENU_MAX_LEVELS', 3),
+            'cache_ttl' => env('MODULE_MENU_CACHE_TTL', 3600), // seconds
+        ],
     ],
 
     /*
@@ -147,6 +159,7 @@ return [
         'notification' => ['identity'],
         'sso' => ['identity'],
         'authorization' => ['identity'],
+        'menu' => ['identity', 'tenant'],
     ],
 
     /*

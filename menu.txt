@@ -1,0 +1,115 @@
+(Super Admin)
+
+
+Dashboard
+Dashboard
+Dashboard
+Dashboard
+Management
+Users
+Bookings
+My Bookings
+Upcoming Bookings
+Booking History
+Configuration
+Tenant Settings
+Domain Settings
+Email / Notifications Settings
+Users (Global)
+All Users
+Roles & Permissions (Global)
+Activity Logs
+Providers
+Provider Directory
+Profile
+Edit Profile
+Security
+Change Password
+Multi-Factor Authentication
+System Management
+Modules & Feature Flags
+Integrations (SSO, SMTP, SMS, Payment)
+API Keys
+Global Billing Plans
+Audit Logs
+Health Monitoring
+Worker Queue Dashboard
+Profile
+Edit Profile
+Security
+Change Password
+Multi-Factor Authentication
+Profile
+Edit Profile
+Security
+Change Password
+Multi-Factor Authentication
+Support
+Help Center
+Support Tickets
+Documentation
+Configuration
+Environment Configuration
+Maintenance Mode
+Backup & Restore
+Global Settings
+Support
+Help Center
+Support Tickets
+Documentation
+Support
+Help Center
+Support Tickets
+Documentation
+Profile
+Edit Profile
+Security
+Change Password
+Multi-Factor Authentication
+Support
+Help Center
+Support Tickets
+Documentation
+
+(Provider )
+Dashboard
+Bookings
+My Schedule
+Booking Requests
+Booking History
+Availability
+Set Availability
+My Services
+Profile
+Security
+Change Password
+Multi-Factor Authentication
+Profile
+Security
+Change Password
+Multi-Factor Authentication
+Profile
+Edit Profile
+Security
+Change Password
+Multi-Factor Authentication
+Support
+Help Center
+Support Tickets
+Documentation
+Support
+Help Center
+Support Tickets
+Documentation
+Support
+Help Center
+Support Tickets
+Documentation
+Profile
+Security
+Change Password
+Multi-Factor Authentication
+Support
+Help Center
+Support Tickets
+Documentation

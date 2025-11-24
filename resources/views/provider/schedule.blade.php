@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
-@section('title', 'My Schedule')
+@section('title', 'Provider Schedule')
 
 @section('content')
 <div class="container-fluid">
@@ -9,89 +9,116 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">My Schedule</h4>
-                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addSlotModal">
-                        <i class="fas fa-plus"></i> Add Time Slot
-                    </button>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Day</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Monday</td>
-                                    <td>09:00 AM</td>
-                                    <td>05:00 PM</td>
-                                    <td><span class="badge badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Disable</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Tuesday</td>
-                                    <td>09:00 AM</td>
-                                    <td>05:00 PM</td>
-                                    <td><span class="badge badge-success">Active</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger">Disable</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="calendar">
+                                <div class="calendar-header">
+                                    <button class="btn btn-sm btn-outline-secondary">&lt;</button>
+                                    <h5>December 2023</h5>
+                                    <button class="btn btn-sm btn-outline-secondary">&gt;</button>
+                                </div>
+                                <div class="calendar-grid">
+                                    <div class="calendar-day-header">
+                                        <div>Sun</div>
+                                        <div>Mon</div>
+                                        <div>Tue</div>
+                                        <div>Wed</div>
+                                        <div>Thu</div>
+                                        <div>Fri</div>
+                                        <div>Sat</div>
+                                    </div>
+                                    <div class="calendar-days">
+                                        <!-- Calendar days would be generated here -->
+                                        <div class="calendar-day">1</div>
+                                        <div class="calendar-day">2</div>
+                                        <div class="calendar-day">3</div>
+                                        <div class="calendar-day">4</div>
+                                        <div class="calendar-day">5</div>
+                                        <div class="calendar-day">6</div>
+                                        <div class="calendar-day">7</div>
+                                        <div class="calendar-day">8</div>
+                                        <div class="calendar-day">9</div>
+                                        <div class="calendar-day">10</div>
+                                        <div class="calendar-day">11</div>
+                                        <div class="calendar-day">12</div>
+                                        <div class="calendar-day">13</div>
+                                        <div class="calendar-day">14</div>
+                                        <div class="calendar-day booked">15</div>
+                                        <div class="calendar-day booked">16</div>
+                                        <div class="calendar-day">17</div>
+                                        <div class="calendar-day">18</div>
+                                        <div class="calendar-day">19</div>
+                                        <div class="calendar-day">20</div>
+                                        <div class="calendar-day">21</div>
+                                        <div class="calendar-day">22</div>
+                                        <div class="calendar-day">23</div>
+                                        <div class="calendar-day">24</div>
+                                        <div class="calendar-day">25</div>
+                                        <div class="calendar-day">26</div>
+                                        <div class="calendar-day">27</div>
+                                        <div class="calendar-day">28</div>
+                                        <div class="calendar-day">29</div>
+                                        <div class="calendar-day">30</div>
+                                        <div class="calendar-day">31</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Availability Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="startTime">Start Time</label>
+                                            <input type="time" class="form-control" id="startTime" value="09:00">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="endTime">End Time</label>
+                                            <input type="time" class="form-control" id="endTime" value="17:00">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Working Days</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="monday" checked>
+                                                <label class="form-check-label" for="monday">Monday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="tuesday" checked>
+                                                <label class="form-check-label" for="tuesday">Tuesday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="wednesday" checked>
+                                                <label class="form-check-label" for="wednesday">Wednesday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="thursday" checked>
+                                                <label class="form-check-label" for="thursday">Thursday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="friday" checked>
+                                                <label class="form-check-label" for="friday">Friday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="saturday">
+                                                <label class="form-check-label" for="saturday">Saturday</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="sunday">
+                                                <label class="form-check-label" for="sunday">Sunday</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Time Slot Modal -->
-<div class="modal fade" id="addSlotModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Time Slot</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label for="day">Day</label>
-                        <select class="form-control" id="day">
-                            <option>Monday</option>
-                            <option>Tuesday</option>
-                            <option>Wednesday</option>
-                            <option>Thursday</option>
-                            <option>Friday</option>
-                            <option>Saturday</option>
-                            <option>Sunday</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="startTime">Start Time</label>
-                        <input type="time" class="form-control" id="startTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="endTime">End Time</label>
-                        <input type="time" class="form-control" id="endTime" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save Slot</button>
             </div>
         </div>
     </div>
