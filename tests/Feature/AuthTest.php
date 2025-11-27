@@ -101,7 +101,7 @@ class AuthTest extends TestCase
     {
         $user = $this->createUser();
 
-        $this->actingAs($user)->get('/logout')
+        $this->actingAs($user)->post('/logout')
             ->assertRedirect('/login');
 
         $this->assertGuest();

@@ -123,4 +123,63 @@ class User extends Authenticatable
         // Check if user has the role by name
         return $this->roles->contains('name', $roleName);
     }
+
+    /**
+     * Get the highest priority role for this user
+     * Lower priority number = higher priority
+     *
+     * @return \App\Domains\Access\Models\Role|null
+     */
+    public function getHighestPriorityRole()
+    {
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
+        return $this->roles->sortBy('priority')->first();
+    }
+
+    /**
+     * Get all active sessions for this user
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getActiveSessions()
+    {
+        return $this->sessions()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->orderBy('last_activity', 'desc')
+            ->get();
+    }
+
+    /**
+     * Terminate all sessions for this user
+     * Optionally exclude a specific session
+     *
+     * @param string|null $exceptSessionId
+     * @return int Number of sessions terminated
+     */
+    public function terminateAllSessions(?string $exceptSessionId = null): int
+    {
+        $query = $this->sessions();
+        
+        if ($exceptSessionId) {
+            $query->where('session_id', '!=', $exceptSessionId);
+        }
+
+        return $query->delete();
+    }
+
+    /**
+     * Check if user has super admin role
+     *
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('Super Admin');
+    }
 }

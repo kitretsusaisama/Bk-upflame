@@ -2,123 +2,52 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Domains\Access\Models\Permission;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class PermissionSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Create default permissions
-        $permissions = [
-            // Tenant permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Tenants',
-                'resource' => 'tenant',
-                'action' => 'read',
-                'description' => 'View tenant information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Tenants',
-                'resource' => 'tenant',
-                'action' => 'write',
-                'description' => 'Create, update, and delete tenants'
-            ],
-            
-            // User permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Users',
-                'resource' => 'user',
-                'action' => 'read',
-                'description' => 'View user information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Users',
-                'resource' => 'user',
-                'action' => 'write',
-                'description' => 'Create, update, and delete users'
-            ],
-            
-            // Role permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Roles',
-                'resource' => 'role',
-                'action' => 'read',
-                'description' => 'View role information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Roles',
-                'resource' => 'role',
-                'action' => 'write',
-                'description' => 'Create, update, and delete roles'
-            ],
-            
-            // Provider permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Providers',
-                'resource' => 'provider',
-                'action' => 'read',
-                'description' => 'View provider information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Providers',
-                'resource' => 'provider',
-                'action' => 'write',
-                'description' => 'Create, update, and delete providers'
-            ],
-            
-            // Booking permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Bookings',
-                'resource' => 'booking',
-                'action' => 'read',
-                'description' => 'View booking information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Bookings',
-                'resource' => 'booking',
-                'action' => 'write',
-                'description' => 'Create, update, and delete bookings'
-            ],
-            
-            // Workflow permissions
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'View Workflows',
-                'resource' => 'workflow',
-                'action' => 'read',
-                'description' => 'View workflow information'
-            ],
-            [
-                'id' => Str::uuid()->toString(),
-                'name' => 'Manage Workflows',
-                'resource' => 'workflow',
-                'action' => 'write',
-                'description' => 'Create, update, and delete workflows'
-            ]
+        // Define modules and their actions
+        $modules = [
+            'users' => ['view', 'create', 'update', 'delete', 'manage', 'export'],
+            'roles' => ['view', 'create', 'update', 'delete', 'manage'],
+            'permissions' => ['view', 'manage'],
+            'finance' => ['view', 'create', 'update', 'delete', 'export', 'approve'],
+            'hr' => ['view', 'create', 'update', 'delete', 'manage'],
+            'operations' => ['view', 'create', 'update', 'delete', 'manage', 'approve'],
+            'appointments' => ['view', 'create', 'update', 'delete', 'manage', 'cancel'],
+            'inventory' => ['view', 'create', 'update', 'delete', 'manage'],
+            'notifications' => ['view', 'create', 'send', 'manage'],
+            'audit_logs' => ['view', 'export'],
+            'reports' => ['view', 'export'],
+            'settings' => ['view', 'update'],
+            'tenants' => ['view', 'create', 'update', 'delete', 'manage'], // Super Admin only
         ];
 
-        foreach ($permissions as $permissionData) {
+        $permissions = [];
+
+        foreach ($modules as $module => $actions) {
+            foreach ($actions as $action) {
+                $permissions[] = [
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'name' => "{$module}.{$action}",
+                    'resource' => $module,
+                    'action' => $action,
+                    'description' => ucfirst($action) . ' ' . ucfirst($module),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        // Insert permissions avoiding duplicates
+        foreach ($permissions as $permission) {
             Permission::firstOrCreate(
-                ['name' => $permissionData['name']],
-                $permissionData
+                ['name' => $permission['name']],
+                $permission
             );
         }
     }

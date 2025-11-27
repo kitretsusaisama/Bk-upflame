@@ -33,6 +33,8 @@ class Role extends Model
         'tenant_id',
         'name',
         'description',
+        'role_family',
+        'priority',
         'is_system',
     ];
 
