@@ -93,15 +93,16 @@ Route::middleware(['auth', 'dashboard.access', 'session.security', 'auto.logout'
     Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
     Route::delete('/sessions/{session}', [SessionController::class, 'destroy'])->name('sessions.destroy');
 
-    // User Management
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', function () { return "Users Index Placeholder"; })->name('index');
-    });
-    Route::prefix('roles')->name('roles.')->group(function () {
-        Route::get('/', function () { return "Roles Index Placeholder"; })->name('index');
-    });
-    Route::prefix('permissions')->name('permissions.')->group(function () {
-        Route::get('/', function () { return "Permissions Index Placeholder"; })->name('index');
+    // Super Admin Routes (Platform-level RBAC UI)
+    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+        // Roles & Permissions Management
+        Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+        Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class)->only(['index']);
+        
+        // User Management (Cross-Tenant)
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::post('users/{user}/activate', [\App\Http\Controllers\Admin\UserController::class, 'activate'])->name('users.activate');
+        Route::post('users/{user}/deactivate', [\App\Http\Controllers\Admin\UserController::class, 'deactivate'])->name('users.deactivate');
     });
 
     // Operations
@@ -136,7 +137,7 @@ Route::middleware(['auth', 'dashboard.access', 'session.security', 'auto.logout'
 */
 
 Route::middleware('auth')->group(function () {
-    // Super Admin legacy routes
+    // Super Admin Tenant Management (existing)
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
         Route::put('tenants/{tenant}/suspend', [\App\Http\Controllers\Admin\TenantController::class, 'suspend'])->name('tenants.suspend');
