@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Domains\Identity\Services\AuthenticationService;
 use App\Http\Controllers\Controller;
-use App\Support\Concerns\DeterminesDashboardRoute;
+use App\Services\SessionManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,13 +12,15 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    use DeterminesDashboardRoute;
-
     protected AuthenticationService $authService;
+    protected SessionManager $sessionManager;
 
-    public function __construct(AuthenticationService $authService)
-    {
+    public function __construct(
+        AuthenticationService $authService,
+        SessionManager $sessionManager
+    ) {
         $this->authService = $authService;
+        $this->sessionManager = $sessionManager;
     }
 
     /**
@@ -52,22 +54,40 @@ class LoginController extends Controller
         $remember = true;
 
         if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            // Check if user is active
-            if (!Auth::user()->isActive()) {
+            // Check if user is active before proceeding
+            $user = Auth::user();
+            
+            if (!$user->isActive()) {
                 Auth::logout();
                 throw ValidationException::withMessages([
                     'email' => 'Your account is not active.',
                 ]);
             }
 
-            $user = Auth::user();
+            // Regenerate session ID to prevent session fixation
+            $request->session()->regenerate();
+
+            // Initialize last activity tracking
+            session(['last_activity_time' => time()]);
+            session(['last_session_regeneration' => time()]);
+
+            // Check session limit
+            if ($this->sessionManager->hasReachedSessionLimit($user)) {
+                // Enforce limit by removing oldest session
+                $this->sessionManager->enforceSessionLimit($user, session()->getId());
+            }
+
+            // Create session record
+            $this->sessionManager->createSession($user, $request, session()->getId());
+
+            // Update last login
             $user->update(['last_login' => now()]);
 
+            // Issue SSO token
             $this->issueSsoToken($request, $user);
 
-            return redirect()->route($this->determineDashboardRoute($user));
+            // Redirect to unified dashboard
+            return redirect()->route('dashboard');
         }
 
         throw ValidationException::withMessages([
@@ -76,10 +96,11 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect user based on their role
+     * Issue SSO token for cross-app authentication
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Domains\Identity\Models\User  $user
+     * @return void
      */
     protected function issueSsoToken(Request $request, $user): void
     {
@@ -114,9 +135,19 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
+        $sessionId = session()->getId();
 
         if ($user) {
+            // Revoke SSO token
             $this->authService->revokeTokenByName($user, 'web-session');
+
+            // Check if user wants to logout from all devices
+            if ($request->input('logout_all')) {
+                $this->sessionManager->terminateAllSessions($user);
+            } else {
+                // Just terminate current session
+                $this->sessionManager->terminateSession($sessionId);
+            }
         }
 
         Auth::guard('web')->logout();

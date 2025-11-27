@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\DashboardApiController;
 use App\Domains\Identity\Http\Controllers\AuthController;
 use App\Domains\Identity\Http\Controllers\TenantController;
 use App\Domains\Identity\Http\Controllers\SsoController;
@@ -17,6 +18,20 @@ use App\Domains\Booking\Http\Controllers\BookingController;
 use App\Domains\Booking\Http\Controllers\ServiceController;
 use App\Domains\Notification\Http\Controllers\NotificationController;
 
+/*
+|--------------------------------------------------------------------------
+| Unified Dashboard API Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
+    Route::get('/', [DashboardApiController::class, 'index']);
+    Route::get('/widgets', [DashboardApiController::class, 'widgets']);
+    Route::get('/menu', [DashboardApiController::class, 'menu']);
+    Route::get('/stats', [DashboardApiController::class, 'stats']);
+});
+
+
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
@@ -25,6 +40,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
+            Route::get('me/sidebar', [DashboardApiController::class, 'menu']);
             Route::post('mfa/setup', [AuthController::class, 'setupMfa']);
             Route::post('mfa/verify', [AuthController::class, 'verifyMfa']);
             Route::post('token', [AuthController::class, 'refreshToken']);
@@ -143,3 +159,5 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
+
+

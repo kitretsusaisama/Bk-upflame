@@ -62,7 +62,7 @@
                     <span>Settings</span>
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="{{ route('logout') }}" class="dropdown-item">
+                <a href="#" onclick="toggleLogoutModal(); return false;" class="dropdown-item">
                     <span class="dropdown-icon">🚪</span>
                     <span>Logout</span>
                 </a>

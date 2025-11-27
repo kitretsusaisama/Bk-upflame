@@ -1,0 +1,11 @@
+{
+    "name": "MedCore",
+    "alias": "medcore",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\MedCore\\app\\Providers\\MedCoreServiceProvider"
+    ],
+    "files": []
+}
