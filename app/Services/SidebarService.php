@@ -16,12 +16,35 @@ class SidebarService
      */
     public function buildForUser(User $user): array
     {
-        // Cache menu for 10 minutes per user
-        $cacheKey = "sidebar_menu_{$user->id}";
-        
-        return Cache::remember($cacheKey, 600, function () use ($user) {
+        // Check if caching is enabled
+        if (!config('sidebar.cache.enabled', true)) {
             return $this->buildMenuStructure($user);
-        });
+        }
+
+        // Get config values
+        $cachePrefix = config('sidebar.cache.prefix', 'sidebar_menu');
+        $cacheTtl = config('sidebar.cache.ttl', 600);
+        $cacheDriver = config('sidebar.cache.driver', config('cache.default'));
+        $cacheKey = "{$cachePrefix}_{$user->id}";
+        
+        try {
+            $cache = Cache::store($cacheDriver);
+            
+            // Use cache tags if enabled (Redis/Memcached only)
+            if (config('sidebar.cache.tags_enabled', true)) {
+                return $cache->tags(['sidebar', "user:{$user->id}"])
+                    ->remember($cacheKey, $cacheTtl, fn() => $this->buildMenuStructure($user));
+            }
+            
+            return $cache->remember($cacheKey, $cacheTtl, fn() => $this->buildMenuStructure($user));
+        } catch (\Exception $e) {
+            // Fallback to no cache on cache failure
+            \Illuminate\Support\Facades\Log::warning('Sidebar cache failed, building without cache', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+            return $this->buildMenuStructure($user);
+        }
     }
 
     /**
@@ -109,6 +132,31 @@ class SidebarService
      */
     public function clearCache(User $user): void
     {
-        Cache::forget("sidebar_menu_{$user->id}");
+        $cachePrefix = config('sidebar.cache.prefix', 'sidebar_menu');
+        $cacheDriver = config('sidebar.cache.driver', config('cache.default'));
+        $cache = Cache::store($cacheDriver);
+        
+        if (config('sidebar.cache.tags_enabled', true)) {
+            $cache->tags(['sidebar', "user:{$user->id}"])->flush();
+        } else {
+            $cache->forget("{$cachePrefix}_{$user->id}");
+        }
+    }
+    
+    /**
+     * Clear all sidebar caches
+     *
+     * @return void
+     */
+    public function clearAllCaches(): void
+    {
+        $cacheDriver = config('sidebar.cache.driver', config('cache.default'));
+        $cache = Cache::store($cacheDriver);
+        
+        if (config('sidebar.cache.tags_enabled', true)) {
+            $cache->tags('sidebar')->flush();
+        } else {
+            \Illuminate\Support\Facades\Log::warning('Global sidebar cache flush not supported without tags');
+        }
     }
 }

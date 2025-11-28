@@ -21,5 +21,11 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\Route::aliasMiddleware('tenant.resolution', \App\Http\Middleware\TenantResolution::class);
         \Illuminate\Support\Facades\Route::aliasMiddleware('tenant.scope', \App\Http\Middleware\TenantScope::class);
+        
+        // Register cache warming on login
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Login::class,
+            \App\Listeners\WarmSidebarCache::class
+        );
     }
 }

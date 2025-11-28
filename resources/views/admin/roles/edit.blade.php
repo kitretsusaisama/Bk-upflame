@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('dashboard.layout')
 
 @section('title', 'Edit Role')
 
@@ -58,7 +58,7 @@
                                     <label for="priority">Priority *</label>
                                     <input type="number" name="priority" id="priority" class="form-control" 
                                            value="{{ old('priority', $role->priority) }}" min="1" max="100" required>
-                                            <small class="form-text text-muted">Lower = Higher priority</small>
+                                    <small class="form-text text-muted">Lower = Higher priority</small>
                                 </div>
                             </div>
 
@@ -118,7 +118,7 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card">
+            <div class="card mb-3">
                 <div class="card-header">
                     <strong>Role Info</strong>
                 </div>
@@ -126,6 +126,35 @@
                     <p><strong>Created:</strong> {{ $role->created_at->format('M d, Y') }}</p>
                     <p><strong>Updated:</strong> {{ $role->updated_at->format('M d, Y') }}</p>
                     <p><strong>Users:</strong> {{ $role->users()->count() }}</p>
+                    <p><strong>Type:</strong> 
+                        @if($role->is_system)
+                            <span class="badge badge-warning">System Role</span>
+                        @else
+                            <span class="badge badge-info">Custom Role</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <strong>Quick Actions</strong>
+                </div>
+                <div class="card-body">
+                    @if(!$role->is_system || $role->name !== 'Super Admin')
+                        <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" 
+                              onsubmit="return confirm('Are you sure you want to delete this role? This action cannot be undone.');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-block">
+                                <i class="fas fa-trash"></i> Delete Role
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-lock"></i> System roles cannot be deleted.
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>

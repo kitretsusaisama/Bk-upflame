@@ -59,7 +59,10 @@ class User extends Authenticatable
             'user_roles',
             'user_id',
             'role_id'
-        )->withPivot('tenant_id', 'assigned_by')->withTimestamps();
+        )
+        ->using(\App\Domains\Access\Models\UserRole::class)
+        ->withPivot('id', 'tenant_id', 'assigned_by')
+        ->withTimestamps();
     }
 
     public function sessions()

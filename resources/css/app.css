@@ -9,3 +9,430 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* ========================================
+   Microsoft Fluent Design System
+   Reusable component library for admin pages
+   ======================================== */
+
+@layer components {
+    :root {
+        /* Microsoft Color Palette */
+        --ms-blue: #0078D4;
+        --ms-blue-hover: #106EBE;
+        --ms-blue-light: rgba(0, 120, 212, 0.05);
+        --ms-gray-50: #F3F2F1;
+        --ms-gray-100: #E1DFDD;
+        --ms-gray-200: #C8C6C4;
+        --ms-gray-300: #A19F9D;
+        --ms-gray-900: #323130;
+        --ms-success: #107C10;
+        --ms-warning: #F7630C;
+        --ms-danger: #D13438;
+
+        /* Shadows */
+        --ms-shadow: 0 3.2px 7.2px rgba(0, 0, 0, .13), 0 0.6px 1.8px rgba(0, 0, 0, .11);
+        --ms-shadow-hover: 0 6.4px 14.4px rgba(0, 0, 0, .18), 0 1.2px 3.6px rgba(0, 0, 0, .15);
+    }
+
+    /* Users Page Base */
+    .users-page {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        background: #FAF9F8;
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    /* Container */
+    .ms-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Page Header */
+    .ms-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--ms-gray-100);
+    }
+
+    .ms-page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--ms-gray-900);
+        margin: 0;
+    }
+
+    /* Buttons */
+    .ms-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+        transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .ms-button-primary {
+        background: var(--ms-blue);
+        color: white;
+        border-color: var(--ms-blue);
+    }
+
+    .ms-button-primary:hover {
+        background: var(--ms-blue-hover);
+        border-color: var(--ms-blue-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 120, 212, 0.3);
+    }
+
+    .ms-button-secondary {
+        background: white;
+        color: var(--ms-gray-900);
+        border-color: var(--ms-gray-200);
+    }
+
+    .ms-button-secondary:hover {
+        background: var(--ms-gray-50);
+        border-color: var(--ms-gray-300);
+    }
+
+    /* Cards */
+    .ms-card {
+        background: white;
+        border-radius: 4px;
+        box-shadow: var(--ms-shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .ms-card:hover {
+        box-shadow: var(--ms-shadow-hover);
+    }
+
+    .ms-card-header {
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(to bottom, #FAFAFA, #F5F5F5);
+        border-bottom: 1px solid var(--ms-gray-100);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ms-card-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--ms-gray-900);
+        margin: 0;
+    }
+
+    .ms-card-body {
+        padding: 0;
+    }
+
+    /* Forms */
+    .ms-form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ms-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--ms-gray-900);
+    }
+
+    .ms-input,
+    .ms-select {
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--ms-gray-200);
+        border-radius: 4px;
+        font-size: 0.875rem;
+        background: white;
+        transition: all 0.15s ease;
+    }
+
+    .ms-input:focus,
+    .ms-select:focus {
+        outline: none;
+        border-color: var(--ms-blue);
+        box-shadow: 0 0 0 1px var(--ms-blue);
+    }
+
+    .ms-input:hover,
+    .ms-select:hover {
+        border-color: var(--ms-gray-300);
+    }
+
+    /* Filters */
+    .ms-filters-toggle {
+        width: 100%;
+        padding: 1.25rem 1.5rem;
+        background: white;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ms-gray-900);
+    }
+
+    .ms-filters-toggle:hover {
+        background: var(--ms-gray-50);
+    }
+
+    .ms-filters-content {
+        padding: 1.5rem;
+        background: var(--ms-gray-50);
+    }
+
+    /* Tables */
+    .ms-table-container {
+        overflow-x: auto;
+        background: white;
+    }
+
+    .ms-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .ms-table thead {
+        background: linear-gradient(to bottom, #FAFAFA, #F3F2F1);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .ms-table th {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--ms-gray-900);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--ms-gray-100);
+        white-space: nowrap;
+    }
+
+    .ms-table th.sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .ms-table th.sortable:hover {
+        background: var(--ms-blue-light);
+        color: var(--ms-blue);
+    }
+
+    .ms-table tbody tr {
+        border-bottom: 1px solid var(--ms-gray-100);
+        transition: all 0.15s ease;
+    }
+
+    .ms-table tbody tr:hover {
+        background: var(--ms-blue-light);
+        transform: scale(1.002);
+        box-shadow: 0 2px 4px rgba(0, 120, 212, 0.1);
+    }
+
+    .ms-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .ms-table td {
+        padding: 1.125rem 1.25rem;
+        font-size: 0.875rem;
+        color: var(--ms-gray-900);
+    }
+
+    /* Badges */
+    .ms-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.625rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .ms-badge-success {
+        background: rgba(16, 124, 16, 0.1);
+        color: var(--ms-success);
+    }
+
+    .ms-badge-warning {
+        background: rgba(247, 99, 12, 0.1);
+        color: var(--ms-warning);
+    }
+
+    .ms-badge-danger {
+        background: rgba(209, 52, 56, 0.1);
+        color: var(--ms-danger);
+    }
+
+    .ms-badge-info {
+        background: rgba(0, 120, 212, 0.1);
+        color: var(--ms-blue);
+    }
+
+    .ms-badge-gray {
+        background: rgba(161, 159, 157, 0.1);
+        color: var(--ms-gray-300);
+    }
+
+    /* Icon Buttons */
+    .ms-icon-button {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--ms-gray-200);
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        color: var(--ms-gray-900);
+    }
+
+    .ms-icon-button:hover {
+        background: var(--ms-blue);
+        border-color: var(--ms-blue);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .ms-icon-button.danger {
+        color: var(--ms-danger);
+    }
+
+    .ms-icon-button.danger:hover {
+        background: var(--ms-danger);
+        border-color: var(--ms-danger);
+        color: white;
+    }
+
+    /* Pagination */
+    .ms-pagination {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    /* User Components */
+    .ms-user-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .ms-user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--ms-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .ms-user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .ms-user-email {
+        font-weight: 500;
+        color: var(--ms-gray-900);
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .ms-user-meta {
+        font-size: 0.75rem;
+        color: var(--ms-gray-300);
+    }
+
+    /* Empty States */
+    .ms-empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .ms-empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        opacity: 0.3;
+    }
+
+    .ms-empty-text {
+        color: var(--ms-gray-300);
+        font-size: 1rem;
+    }
+
+    /* Utilities */
+    .chevron-rotate {
+        transition: transform 0.3s ease;
+    }
+
+    .chevron-rotate.rotate {
+        transform: rotate(180deg);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ms-card {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .ms-page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .ms-table th,
+        .ms-table td {
+            padding: 0.75rem 0.875rem;
+            font-size: 0.8125rem;
+        }
+    }
+}

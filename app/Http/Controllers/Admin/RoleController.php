@@ -40,8 +40,14 @@ class RoleController extends Controller
 
         $roles = $query->paginate(15)->withQueryString();
         $tenants = Tenant::where('status', 'active')->get();
+        
+        // Fetch users with their roles for the user table
+        $users = \App\Domains\Identity\Models\User::with(['roles', 'tenant'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
-        return view('admin.roles.index', compact('roles', 'tenants'));
+        return view('admin.roles.index', compact('roles', 'tenants', 'users'));
     }
 
     /**

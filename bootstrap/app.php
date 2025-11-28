@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\CheckImpersonation::class,
+            \App\Http\Middleware\ShareSidebarData::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
