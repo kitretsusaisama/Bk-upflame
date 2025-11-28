@@ -248,8 +248,10 @@
                         this.idleWarningOpen = true;
                     }
                 }
-            }))
         })
     </script>
+    
+    <!-- Admin Utilities -->
+    <script src="{{ asset('js/admin-utils.js') }}"></script>
 </body>
 </html>
